@@ -190,7 +190,7 @@
 
                 <div class="action-buttons">
                     <button class="btn btn-primary" onclick="openModal('newCaseModal')"><i class="fas fa-upload"></i> Nuevo Oficio</button>
-                    <button class="btn btn-secondary" onclick="loadFromSupabase()"><i class="fas fa-sync"></i> Sincronizar</button>
+                    <button class="btn btn-secondary" onclick="loadFromLocalStorage()"><i class="fas fa-sync"></i> Sincronizar</button>
                 </div>
 
                 <div class="cases-table">
@@ -205,7 +205,7 @@
                             </tr>
                         </thead>
                         <tbody id="casesTable">
-                            <tr><td colspan="5" style="text-align:center;padding:20px;">Cargando...</td></tr>
+                            <tr><td colspan="5" style="text-align:center;padding:20px;">Sin oficios</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -299,13 +299,8 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const SUPABASE_URL = 'https://gmbhptqijgrlxosfskva.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdtYmhwdHFpamdybHhvc2Zza3ZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwNjIyNTAsImV4cCI6MjA5MjYzODI1MH0.FQRwIjvLeXUaNM_Vx2R2KLuYJyWgNrjmuP85QTdRBLY';
 const PASSWORD = '3813';
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
 let currentUser = null;
 let cases = [];
 let contacts = [];
@@ -344,7 +339,7 @@ function doLogin() {
     document.getElementById('userFullName').textContent = firstName + ' ' + lastName;
     document.getElementById('userPosition').textContent = 'Legajo #' + legajo;
 
-    loadFromSupabase();
+    loadFromLocalStorage();
 }
 
 function doLogout() {
@@ -356,20 +351,19 @@ function doLogout() {
     }
 }
 
-async function loadFromSupabase() {
-    try {
-        const { data: casesData } = await supabase.from('oficios').select('*');
-        const { data: contactsData } = await supabase.from('contactos').select('*');
-        
-        cases = casesData || [];
-        contacts = contactsData || [];
-        
-        updateStats();
-        renderTable();
-        loadContacts();
-    } catch (err) {
-        console.error('Error:', err);
+function loadFromLocalStorage() {
+    const stored = localStorage.getItem('sigolCases');
+    if (stored) {
+        cases = JSON.parse(stored);
     }
+    const contactsStored = localStorage.getItem('sigolContacts');
+    if (contactsStored) {
+        contacts = JSON.parse(contactsStored);
+    }
+    
+    updateStats();
+    renderTable();
+    loadContacts();
 }
 
 function updateStats() {
@@ -405,8 +399,9 @@ function renderTable() {
     });
 }
 
-async function saveCase() {
+function saveCase() {
     const data = {
+        id: Date.now(),
         numero_legajo: document.getElementById('caseNumber').value,
         causa: document.getElementById('caseName').value,
         fiscalia: document.getElementById('prosecutor').value,
@@ -420,19 +415,16 @@ async function saveCase() {
         created_at: new Date().toISOString()
     };
 
-    try {
-        const { error } = await supabase.from('oficios').insert([data]);
-        if (error) throw error;
-        closeModal('newCaseModal');
-        await loadFromSupabase();
-        alert('✓ Guardado en Supabase');
-    } catch (err) {
-        alert('❌ Error: ' + err.message);
-    }
+    cases.push(data);
+    localStorage.setItem('sigolCases', JSON.stringify(cases));
+    closeModal('newCaseModal');
+    loadFromLocalStorage();
+    alert('✓ Oficio guardado en localStorage (sync a Supabase próximamente)');
 }
 
-async function saveContact() {
+function saveContact() {
     const data = {
+        id: Date.now(),
         nombre: document.getElementById('contactName').value,
         email: document.getElementById('contactEmail').value,
         telefono: document.getElementById('contactPhone').value,
@@ -440,15 +432,11 @@ async function saveContact() {
         created_at: new Date().toISOString()
     };
 
-    try {
-        const { error } = await supabase.from('contactos').insert([data]);
-        if (error) throw error;
-        closeModal('newContactModal');
-        await loadFromSupabase();
-        alert('✓ Guardado');
-    } catch (err) {
-        alert('❌ Error: ' + err.message);
-    }
+    contacts.push(data);
+    localStorage.setItem('sigolContacts', JSON.stringify(contacts));
+    closeModal('newContactModal');
+    loadFromLocalStorage();
+    alert('✓ Contacto guardado');
 }
 
 function loadContacts() {
@@ -486,7 +474,7 @@ if (JSON.parse(localStorage.getItem('sigolUser'))) {
     document.getElementById('dashboardScreen').classList.add('active');
     document.getElementById('userFullName').textContent = u.firstName + ' ' + u.lastName;
     document.getElementById('userPosition').textContent = 'Legajo #' + u.legajo;
-    loadFromSupabase();
+    loadFromLocalStorage();
 }
 </script>
 
