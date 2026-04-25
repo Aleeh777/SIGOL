@@ -1,0 +1,1750 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIGOL - Sistema Integral de Gestión de Oficios y Legajos</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-dark: #1a3a52;
+            --primary-lighter: #2a4f6f;
+            --gray-light: #e5e7eb;
+            --gray-medium: #6b7280;
+            --gray-dark: #374151;
+            --accent-cyan: #0ea5e9;
+            --white: #ffffff;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #3b82f6;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--gray-dark);
+            margin: 0;
+            padding: 0;
+        }
+
+        /* ===== LOGIN SCREEN ===== */
+        #loginScreen {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0f1419 0%, #1a3a52 100%);
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1000;
+        }
+
+        #loginScreen.hidden {
+            display: none !important;
+        }
+
+        .login-box {
+            background: rgba(255, 255, 255, 0.98);
+            padding: 60px 50px;
+            border-radius: 12px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 450px;
+            backdrop-filter: blur(10px);
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .login-logo {
+            font-size: 42px;
+            font-weight: 700;
+            font-family: 'Playfair Display', serif;
+            color: var(--primary-dark);
+            margin-bottom: 10px;
+            letter-spacing: -0.5px;
+        }
+
+        .login-subtitle {
+            color: var(--gray-medium);
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--primary-dark);
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1.5px solid var(--gray-light);
+            border-radius: 6px;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            color: var(--gray-dark);
+            background: white;
+            transition: all 0.3s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+        }
+
+        .form-input::placeholder {
+            color: #d1d5db;
+        }
+
+        .login-button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-lighter) 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 10px;
+        }
+
+        .login-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(26, 58, 82, 0.3);
+        }
+
+        .error-message {
+            background: rgba(239, 68, 68, 0.1);
+            color: #991b1b;
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-size: 13px;
+            display: none;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .success-message {
+            background: rgba(16, 185, 129, 0.1);
+            color: #065f46;
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-size: 13px;
+            display: none;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        /* ===== DASHBOARD ===== */
+        #dashboardScreen {
+            display: none;
+            height: 100vh;
+            flex-direction: column;
+            background: #f9fafb;
+        }
+
+        #dashboardScreen.active {
+            display: flex;
+        }
+
+        .dashboard-header {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-lighter) 100%);
+            color: white;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            border-bottom: 3px solid var(--accent-cyan);
+        }
+
+        .header-title {
+            font-size: 24px;
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .header-user {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-info {
+            text-align: right;
+            font-size: 13px;
+        }
+
+        .user-name {
+            font-weight: 600;
+            display: block;
+        }
+
+        .user-role {
+            font-size: 11px;
+            opacity: 0.85;
+        }
+
+        .sync-status {
+            font-size: 11px;
+            padding: 4px 8px;
+            background: rgba(16, 185, 129, 0.2);
+            border-radius: 3px;
+            margin-left: 10px;
+        }
+
+        .logout-button {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .logout-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .dashboard-content {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 260px;
+            background: white;
+            border-right: 1px solid var(--gray-light);
+            padding: 20px;
+            overflow-y: auto;
+            box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .sidebar-item {
+            padding: 14px 16px;
+            margin-bottom: 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--gray-medium);
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar-item:hover {
+            background: #f3f4f6;
+            color: var(--primary-dark);
+        }
+
+        .sidebar-item.active {
+            background: linear-gradient(90deg, rgba(14, 165, 233, 0.1) 0%, transparent 100%);
+            color: var(--accent-cyan);
+            border-left-color: var(--accent-cyan);
+            font-weight: 600;
+        }
+
+        .sidebar-item i {
+            width: 18px;
+            text-align: center;
+        }
+
+        .main-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 30px 40px;
+            background: #f9fafb;
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        /* STATS CARDS */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            border-top: 4px solid var(--accent-cyan);
+            transition: all 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+        }
+
+        .stat-card.pending { border-top-color: var(--warning); }
+        .stat-card.in-progress { border-top-color: var(--info); }
+        .stat-card.finished { border-top-color: var(--success); }
+        .stat-card.sent { border-top-color: var(--accent-cyan); }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--gray-medium);
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+        }
+
+        .stat-number {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--primary-dark);
+            font-family: 'Playfair Display', serif;
+        }
+
+        /* SEARCH SECTION */
+        .search-section {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            margin-bottom: 30px;
+        }
+
+        .search-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--primary-dark);
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .search-bar-wrapper {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .search-bar {
+            width: 100%;
+            padding: 14px 16px 14px 44px;
+            border: 2px solid var(--gray-light);
+            border-radius: 6px;
+            font-size: 14px;
+            transition: all 0.3s;
+            background: white;
+        }
+
+        .search-bar:focus {
+            outline: none;
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray-medium);
+            pointer-events: none;
+        }
+
+        .filter-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .filter-select {
+            padding: 10px 12px;
+            border: 1px solid var(--gray-light);
+            border-radius: 4px;
+            font-size: 13px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--accent-cyan);
+        }
+
+        /* BUTTONS */
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-lighter) 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(26, 58, 82, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--gray-light);
+            color: var(--gray-dark);
+        }
+
+        .btn-secondary:hover {
+            background: #d1d5db;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        /* TABLE */
+        .cases-table {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        thead {
+            background: linear-gradient(90deg, #f3f4f6 0%, #e5e7eb 100%);
+            border-bottom: 2px solid var(--accent-cyan);
+        }
+
+        th {
+            padding: 16px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--primary-dark);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--gray-light);
+        }
+
+        tbody tr:hover {
+            background: #f9fafb;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-pending {
+            background: rgba(245, 158, 11, 0.1);
+            color: #b45309;
+        }
+
+        .status-progress {
+            background: rgba(59, 130, 246, 0.1);
+            color: #1e40af;
+        }
+
+        .status-observed {
+            background: rgba(239, 68, 68, 0.1);
+            color: #7f1d1d;
+        }
+
+        .status-finished {
+            background: rgba(16, 185, 129, 0.1);
+            color: #065f46;
+        }
+
+        .status-sent {
+            background: rgba(14, 165, 233, 0.1);
+            color: #0c4a6e;
+        }
+
+        .action-icons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .icon-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 4px;
+            background: transparent;
+            color: var(--gray-medium);
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+            font-size: 14px;
+        }
+
+        .icon-btn:hover {
+            background: var(--gray-light);
+            color: var(--accent-cyan);
+        }
+
+        /* MODAL */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            overflow-y: auto;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 8px;
+            max-width: 900px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            width: 90%;
+            margin: 20px auto;
+        }
+
+        .modal-header {
+            padding: 25px 30px;
+            border-bottom: 2px solid var(--gray-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(90deg, #f9fafb 0%, white 100%);
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--primary-dark);
+            font-family: 'Playfair Display', serif;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: var(--gray-medium);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .modal-close:hover {
+            color: var(--primary-dark);
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        .form-section {
+            margin-bottom: 30px;
+        }
+
+        .form-section-title {
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--primary-dark);
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--accent-cyan);
+            letter-spacing: 0.5px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--primary-dark);
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 10px 12px;
+            border: 1px solid var(--gray-light);
+            border-radius: 4px;
+            font-size: 13px;
+            font-family: 'Inter', sans-serif;
+            background: white;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+        }
+
+        .modal-footer {
+            padding: 20px 30px;
+            border-top: 1px solid var(--gray-light);
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            background: #f9fafb;
+        }
+
+        .file-upload-area {
+            border: 2px dashed var(--accent-cyan);
+            border-radius: 6px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: rgba(14, 165, 233, 0.05);
+        }
+
+        .file-upload-area:hover {
+            background: rgba(14, 165, 233, 0.1);
+            border-color: var(--primary-dark);
+        }
+
+        .file-upload-icon {
+            font-size: 32px;
+            color: var(--accent-cyan);
+            margin-bottom: 10px;
+        }
+
+        .file-list {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f9fafb;
+            border-radius: 4px;
+        }
+
+        .file-item {
+            padding: 8px;
+            background: white;
+            border-radius: 3px;
+            margin-bottom: 8px;
+            font-size: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid var(--gray-light);
+            border-top-color: var(--accent-cyan);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .sidebar { width: 100%; max-height: 120px; display: flex; overflow-x: auto; border-right: none; border-bottom: 1px solid var(--gray-light); padding: 10px; }
+            .sidebar-item { white-space: nowrap; flex: 0 0 auto; margin-bottom: 0; margin-right: 10px; }
+            .main-area { padding: 20px 15px; }
+        }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: var(--gray-medium); border-radius: 4px; }
+    </style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+    <div class="login-box">
+        <div class="login-header">
+            <div class="login-logo">SIGOL</div>
+            <div class="login-subtitle">Sistema de Gestión de Oficios - PDT Tucumán</div>
+        </div>
+        <div id="errorMessage" class="error-message"></div>
+        <div id="successMessage" class="success-message"></div>
+        <form id="loginForm">
+            <div class="form-group">
+                <label class="form-label">Nombre</label>
+                <input type="text" class="form-input" id="firstName" placeholder="Ej: Juan" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Apellido</label>
+                <input type="text" class="form-input" id="lastName" placeholder="Ej: García" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Número de Legajo</label>
+                <input type="text" class="form-input" id="legajoNumber" placeholder="Ej: 2847" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Clave de Acceso</label>
+                <input type="password" class="form-input" id="password" placeholder="••••••••" required>
+            </div>
+            <button type="button" class="login-button" onclick="handleLogin()">Ingresar al Sistema</button>
+        </form>
+    </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboardScreen">
+    <div class="dashboard-header">
+        <div class="header-title">SIGOL - PDT Tucumán</div>
+        <div class="header-user">
+            <div class="user-info">
+                <span class="user-name" id="userFullName">Usuario</span>
+                <span class="user-role" id="userPosition">Legajo</span>
+                <span class="sync-status" id="syncStatus">✓ Conectado</span>
+            </div>
+            <button class="logout-button" onclick="handleLogout()">Cerrar Sesión</button>
+        </div>
+    </div>
+
+    <div class="dashboard-content">
+        <div class="sidebar">
+            <div class="sidebar-item active" onclick="showSection('dashboard', this)">
+                <i class="fas fa-chart-line"></i> Panel Principal
+            </div>
+            <div class="sidebar-item" onclick="showSection('new-case', this)">
+                <i class="fas fa-plus-circle"></i> Nuevo Oficio
+            </div>
+            <div class="sidebar-item" onclick="showSection('pending', this)">
+                <i class="fas fa-hourglass-start"></i> Pendientes
+            </div>
+            <div class="sidebar-item" onclick="showSection('in-progress', this)">
+                <i class="fas fa-spinner"></i> En Trámite
+            </div>
+            <div class="sidebar-item" onclick="showSection('finished', this)">
+                <i class="fas fa-check-circle"></i> Finalizados
+            </div>
+            <div class="sidebar-item" onclick="showSection('sent', this)">
+                <i class="fas fa-paper-plane"></i> Remitidos
+            </div>
+            <div class="sidebar-item" onclick="showSection('contacts', this)">
+                <i class="fas fa-envelope"></i> Contactos
+            </div>
+        </div>
+
+        <div class="main-area">
+            <!-- DASHBOARD -->
+            <div id="section-dashboard" class="section active">
+                <div class="stats-grid">
+                    <div class="stat-card pending">
+                        <div class="stat-label">Pendientes</div>
+                        <div class="stat-number" id="countPending">0</div>
+                    </div>
+                    <div class="stat-card in-progress">
+                        <div class="stat-label">En Trámite</div>
+                        <div class="stat-number" id="countProgress">0</div>
+                    </div>
+                    <div class="stat-card finished">
+                        <div class="stat-label">Finalizados</div>
+                        <div class="stat-number" id="countFinished">0</div>
+                    </div>
+                    <div class="stat-card sent">
+                        <div class="stat-label">Remitidos</div>
+                        <div class="stat-number" id="countSent">0</div>
+                    </div>
+                </div>
+
+                <div class="search-section">
+                    <div class="search-title">🔍 Búsqueda Avanzada de Oficios</div>
+                    <div class="search-bar-wrapper">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" class="search-bar" id="mainSearch" placeholder="Buscar por: legajo, causa, víctima, técnico, fiscalía...">
+                    </div>
+                    <div class="filter-row">
+                        <select class="filter-select" id="filterStatus">
+                            <option value="">Todos los Estados</option>
+                            <option value="Pendiente">Pendiente</option>
+                            <option value="En Trámite">En Trámite</option>
+                            <option value="Finalizado">Finalizado</option>
+                            <option value="Remitido">Remitido</option>
+                        </select>
+                        <select class="filter-select" id="filterDepartment">
+                            <option value="">Todas las Divisiones</option>
+                            <option value="DDTE">Delitos Telemáticos</option>
+                            <option value="SLF">Laboratorio Fotográfico</option>
+                            <option value="Conjunta">Intervención Conjunta</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="openModal('newCaseModal')">
+                        <i class="fas fa-upload"></i> Subir Nuevo Oficio
+                    </button>
+                    <button class="btn btn-secondary" onclick="syncWithSupabase()">
+                        <i class="fas fa-sync"></i> Sincronizar
+                    </button>
+                </div>
+
+                <div class="cases-table">
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Legajo</th>
+                                    <th>Causa</th>
+                                    <th>Fiscalía</th>
+                                    <th>Víctima</th>
+                                    <th>Dependencia</th>
+                                    <th>Técnico</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="casesTable">
+                                <tr><td colspan="8" style="text-align:center; padding:20px;"><div class="loading-spinner"></div> Cargando datos...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- NEW CASE -->
+            <div id="section-new-case" class="section">
+                <h2 style="color: var(--primary-dark); margin-bottom: 20px; font-size: 20px;">Cargar Nuevo Oficio</h2>
+                <button class="btn btn-primary" onclick="openModal('newCaseModal')">
+                    <i class="fas fa-plus"></i> Crear Oficio
+                </button>
+            </div>
+
+            <!-- PENDING -->
+            <div id="section-pending" class="section">
+                <h2 style="color: var(--primary-dark); margin-bottom: 20px; font-size: 20px;">Oficios Pendientes</h2>
+                <div id="pendingList" style="padding: 20px; background: white; border-radius: 8px;"></div>
+            </div>
+
+            <!-- IN-PROGRESS -->
+            <div id="section-in-progress" class="section">
+                <h2 style="color: var(--primary-dark); margin-bottom: 20px; font-size: 20px;">Oficios en Trámite</h2>
+                <div id="progressList" style="padding: 20px; background: white; border-radius: 8px;"></div>
+            </div>
+
+            <!-- FINISHED -->
+            <div id="section-finished" class="section">
+                <h2 style="color: var(--primary-dark); margin-bottom: 20px; font-size: 20px;">Oficios Finalizados</h2>
+                <div id="finishedList" style="padding: 20px; background: white; border-radius: 8px;"></div>
+            </div>
+
+            <!-- SENT -->
+            <div id="section-sent" class="section">
+                <h2 style="color: var(--primary-dark); margin-bottom: 20px; font-size: 20px;">Oficios Remitidos</h2>
+                <div id="sentList" style="padding: 20px; background: white; border-radius: 8px;"></div>
+            </div>
+
+            <!-- CONTACTS -->
+            <div id="section-contacts" class="section">
+                <h2 style="color: var(--primary-dark); margin-bottom: 20px; font-size: 20px;">📧 Gestión de Contactos - Emails de Fiscalías</h2>
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="openModal('newContactModal')">
+                        <i class="fas fa-plus"></i> Agregar Contacto
+                    </button>
+                </div>
+                <div id="contactsList" style="padding: 20px; background: white; border-radius: 8px;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- NEW CASE MODAL -->
+<div class="modal" id="newCaseModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <div class="modal-title">Crear Nuevo Oficio</div>
+            <button class="modal-close" onclick="closeModal('newCaseModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-section">
+                <div class="form-section-title">Información Básica</div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Número de Legajo</label>
+                        <input type="text" id="caseNumber" placeholder="Ej: 2024-001" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Causa / Delito</label>
+                        <input type="text" id="caseName" placeholder="Ej: Fraude" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Fiscalía</label>
+                        <input type="text" id="prosecutor" placeholder="Ej: Fiscalía No. 2" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Fecha de Recepción</label>
+                        <input type="date" id="receiveDate" required>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <div class="form-section-title">Personas Involucradas</div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Víctima</label>
+                        <input type="text" id="victim" placeholder="Nombre">
+                    </div>
+                    <div class="form-group">
+                        <label>Causante / Sospechoso</label>
+                        <input type="text" id="suspect" placeholder="Nombre">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <div class="form-section-title">Asignación</div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Dependencia</label>
+                        <select id="department" required>
+                            <option value="">Seleccionar...</option>
+                            <option value="DDTE">Delitos Telemáticos y Económicos</option>
+                            <option value="SLF">Laboratorio Fotográfico</option>
+                            <option value="Conjunta">Intervención Conjunta</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Técnico Principal</label>
+                        <input type="text" id="mainTechnician" placeholder="Nombre">
+                    </div>
+                    <div class="form-group">
+                        <label>Técnico Secundante</label>
+                        <input type="text" id="secondTechnician" placeholder="Opcional">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <div class="form-section-title">Detalles</div>
+                <div class="form-grid">
+                    <div class="form-group" style="grid-column: 1/-1;">
+                        <label>Tipo de Trabajo</label>
+                        <textarea id="workType" placeholder="Descripción" style="min-height: 80px;"></textarea>
+                    </div>
+                    <div class="form-group" style="grid-column: 1/-1;">
+                        <label>Observaciones</label>
+                        <textarea id="observations" placeholder="Notas" style="min-height: 80px;"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <div class="form-section-title">Adjuntar Archivos (PDF, Word, Imágenes)</div>
+                <div class="file-upload-area" id="fileUploadArea" onclick="document.getElementById('fileInput').click()">
+                    <div class="file-upload-icon">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                    </div>
+                    <div style="margin-bottom: 10px; color: var(--gray-dark); font-weight: 500;">
+                        Arrastra archivos o haz clic para seleccionar
+                    </div>
+                    <div style="font-size: 12px; color: var(--gray-medium);">
+                        PDF, DOC, JPG, PNG (máximo 50 MB c/u)
+                    </div>
+                    <input type="file" id="fileInput" multiple hidden>
+                </div>
+                <div id="fileList" class="file-list" style="display: none;"></div>
+            </div>
+
+            <div class="form-section">
+                <div class="form-section-title">Estado</div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Estado del Trámite</label>
+                        <select id="status" required>
+                            <option value="Pendiente">Pendiente</option>
+                            <option value="En Trámite">En Trámite</option>
+                            <option value="Finalizado">Finalizado</option>
+                            <option value="Remitido">Remitido</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeModal('newCaseModal')">Cancelar</button>
+            <button class="btn btn-primary" onclick="submitNewCase()">Guardar Oficio en Base de Datos</button>
+        </div>
+    </div>
+</div>
+
+<!-- CASE DETAIL MODAL -->
+<div class="modal" id="caseDetailModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <div class="modal-title">Detalle del Oficio</div>
+            <button class="modal-close" onclick="closeModal('caseDetailModal')">&times;</button>
+        </div>
+        <div class="modal-body" id="caseDetailContent">
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeModal('caseDetailModal')">Cerrar</button>
+            <button class="btn btn-primary" onclick="openSendModal(selectedCaseId)">
+                <i class="fas fa-envelope"></i> Enviar por Email
+            </button>
+            <button class="btn btn-danger" onclick="deleteCase()">Eliminar</button>
+        </div>
+    </div>
+</div>
+
+<!-- NEW CONTACT MODAL -->
+<div class="modal" id="newContactModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <div class="modal-title">Agregar Contacto - Email de Fiscalía</div>
+            <button class="modal-close" onclick="closeModal('newContactModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-section">
+                <div class="form-section-title">Datos del Contacto</div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Nombre de Fiscalía</label>
+                        <input type="text" id="contactName" placeholder="Ej: Fiscalía No. 1" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="contactEmail" placeholder="email@fiscalia.gov.ar" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Teléfono (Opcional)</label>
+                        <input type="text" id="contactPhone" placeholder="+54 381 123 4567">
+                    </div>
+                    <div class="form-group">
+                        <label>División Corresponde</label>
+                        <select id="contactDivision" required>
+                            <option value="">Seleccionar...</option>
+                            <option value="DDTE">Delitos Telemáticos y Económicos</option>
+                            <option value="SLF">Laboratorio Fotográfico</option>
+                            <option value="Ambas">Ambas Divisiones</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Fiscal a Cargo</label>
+                        <input type="text" id="contactPerson" placeholder="Nombre del fiscal">
+                    </div>
+                    <div class="form-group">
+                        <label>Observaciones</label>
+                        <textarea id="contactObservations" placeholder="Horarios, contacto alterno, etc." style="min-height: 60px;"></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeModal('newContactModal')">Cancelar</button>
+            <button class="btn btn-primary" onclick="submitNewContact()">Guardar Contacto</button>
+        </div>
+    </div>
+</div>
+
+<!-- SEND CASE MODAL -->
+<div class="modal" id="sendCaseModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <div class="modal-title">Enviar Oficio por Gmail</div>
+            <button class="modal-close" onclick="closeModal('sendCaseModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-section">
+                <div class="form-section-title">Datos del Envío</div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Oficio a Enviar</label>
+                        <input type="text" id="caseToSend" readonly style="background: #f3f4f6;">
+                    </div>
+                    <div class="form-group">
+                        <label>Seleccionar Contacto</label>
+                        <select id="selectContact" required>
+                            <option value="">-- Cargar contactos --</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Email Destino</label>
+                        <input type="email" id="destinationEmail" readonly style="background: #f3f4f6;">
+                    </div>
+                    <div class="form-group">
+                        <label>División Corresponde</label>
+                        <input type="text" id="sendDivision" readonly style="background: #f3f4f6;">
+                    </div>
+                    <div class="form-group" style="grid-column: 1/-1;">
+                        <label>Asunto del Email</label>
+                        <input type="text" id="emailSubject" placeholder="Ej: Envío de Oficio 2024-001" required>
+                    </div>
+                    <div class="form-group" style="grid-column: 1/-1;">
+                        <label>Mensaje</label>
+                        <textarea id="emailMessage" placeholder="Mensaje a incluir en el email" style="min-height: 120px;" required></textarea>
+                    </div>
+                </div>
+            </div>
+            <div style="background: #f0f9ff; padding: 15px; border-radius: 6px; margin-top: 20px; font-size: 12px;">
+                <strong>⚠️ Nota:</strong> Este sistema abre Gmail directamente. Verifica los datos y haz clic en "Enviar" en Gmail.
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeModal('sendCaseModal')">Cancelar</button>
+            <button class="btn btn-primary" onclick="sendCaseToGmail()">Preparar Envío Gmail</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ===== SUPABASE CONFIG =====
+    const SUPABASE_URL = 'https://gmbhptqijgrlxosfskva.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdtYmhwdHFpamdybHhvc2Zza3ZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwNjIyNTAsImV4cCI6MjA5MjYzODI1MH0.FQRwIjvLeXUaNM_Vx2R2KLuYJyWgNrjmuP85QTdRBLY';
+    const MASTER_PASSWORD = '3813';
+
+    // Inicializar Supabase
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let currentUser = null;
+    let cases = [];
+    let contacts = [];
+    let selectedCaseId = null;
+    let uploadedFiles = [];
+
+    // ===== LOGIN =====
+    async function handleLogin() {
+        const firstName = document.getElementById('firstName').value.trim();
+        const lastName = document.getElementById('lastName').value.trim();
+        const legajoNumber = document.getElementById('legajoNumber').value.trim();
+        const password = document.getElementById('password').value;
+
+        const errorEl = document.getElementById('errorMessage');
+        const successEl = document.getElementById('successMessage');
+        errorEl.classList.remove('show');
+        successEl.classList.remove('show');
+
+        if (!firstName || !lastName || !legajoNumber || !password) {
+            errorEl.textContent = '❌ Por favor completa todos los campos';
+            errorEl.classList.add('show');
+            return;
+        }
+
+        if (password !== MASTER_PASSWORD) {
+            errorEl.textContent = '❌ Clave incorrecta. La clave es: 3813';
+            errorEl.classList.add('show');
+            return;
+        }
+
+        if (!/^\d+$/.test(legajoNumber)) {
+            errorEl.textContent = '❌ El legajo debe ser solo números';
+            errorEl.classList.add('show');
+            return;
+        }
+
+        // Guardar usuario en Supabase
+        try {
+            const { data, error } = await supabase
+                .from('usuarios')
+                .insert([{
+                    nombre: firstName,
+                    apellido: lastName,
+                    legajo: legajoNumber,
+                    ultima_sesion: new Date().toISOString()
+                }])
+                .select();
+
+            if (error && error.code !== 'PGRST201') {
+                console.log('Usuario ya existe o error:', error);
+            }
+
+            currentUser = {
+                firstName,
+                lastName,
+                legajoNumber,
+                loginTime: new Date().toLocaleString('es-AR')
+            };
+
+            localStorage.setItem('sigolUser', JSON.stringify(currentUser));
+            initDashboard();
+        } catch (err) {
+            console.error('Error en login:', err);
+            errorEl.textContent = '❌ Error al conectar con base de datos. Verifica tu conexión.';
+            errorEl.classList.add('show');
+        }
+    }
+
+    async function initDashboard() {
+        document.getElementById('loginScreen').classList.add('hidden');
+        document.getElementById('dashboardScreen').classList.add('active');
+        document.getElementById('userFullName').textContent = currentUser.firstName + ' ' + currentUser.lastName;
+        document.getElementById('userPosition').textContent = 'Legajo #' + currentUser.legajoNumber;
+        
+        await loadCasesFromSupabase();
+        await loadContactsFromSupabase();
+    }
+
+    function handleLogout() {
+        if (confirm('¿Cerrar sesión?')) {
+            currentUser = null;
+            document.getElementById('dashboardScreen').classList.remove('active');
+            document.getElementById('loginScreen').classList.remove('hidden');
+            document.getElementById('loginForm').reset();
+        }
+    }
+
+    // ===== LOAD FROM SUPABASE =====
+    async function loadCasesFromSupabase() {
+        try {
+            const { data, error } = await supabase
+                .from('oficios')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (error) throw error;
+
+            cases = data || [];
+            updateStats();
+            renderCasesTable();
+            showSuccessSync();
+        } catch (err) {
+            console.error('Error cargando oficios:', err);
+            updateSyncStatus('❌ Error al cargar datos');
+        }
+    }
+
+    async function loadContactsFromSupabase() {
+        try {
+            const { data, error } = await supabase
+                .from('contactos')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (error) throw error;
+
+            contacts = data || [];
+            loadContacts();
+        } catch (err) {
+            console.error('Error cargando contactos:', err);
+        }
+    }
+
+    async function syncWithSupabase() {
+        updateSyncStatus('⏳ Sincronizando...');
+        await loadCasesFromSupabase();
+        await loadContactsFromSupabase();
+    }
+
+    function showSuccessSync() {
+        updateSyncStatus('✓ Sincronizado');
+        setTimeout(() => {
+            updateSyncStatus('✓ Conectado');
+        }, 2000);
+    }
+
+    function updateSyncStatus(text) {
+        const el = document.getElementById('syncStatus');
+        if (el) el.textContent = text;
+    }
+
+    // ===== SUBMIT NEW CASE =====
+    async function submitNewCase() {
+        const caseData = {
+            numero_legajo: document.getElementById('caseNumber').value,
+            causa: document.getElementById('caseName').value,
+            fiscalia: document.getElementById('prosecutor').value,
+            fecha_recepcion: document.getElementById('receiveDate').value,
+            victima: document.getElementById('victim').value,
+            causante: document.getElementById('suspect').value,
+            dependencia: document.getElementById('department').value,
+            tecnico_principal: document.getElementById('mainTechnician').value,
+            tecnico_secundante: document.getElementById('secondTechnician').value,
+            tipo_trabajo: document.getElementById('workType').value,
+            observaciones: document.getElementById('observations').value,
+            estado: document.getElementById('status').value,
+            usuario_creador: currentUser.firstName + ' ' + currentUser.lastName,
+            created_at: new Date().toISOString()
+        };
+
+        try {
+            updateSyncStatus('⏳ Guardando...');
+
+            const { data, error } = await supabase
+                .from('oficios')
+                .insert([caseData])
+                .select();
+
+            if (error) throw error;
+
+            // Subir archivos si existen
+            if (uploadedFiles.length > 0) {
+                await uploadFilesToSupabase(data[0].id);
+            }
+
+            closeModal('newCaseModal');
+            resetCaseForm();
+            await loadCasesFromSupabase();
+            alert('✓ Oficio guardado en base de datos');
+            showSuccessSync();
+        } catch (err) {
+            console.error('Error guardando oficio:', err);
+            alert('❌ Error: ' + err.message);
+            updateSyncStatus('❌ Error al guardar');
+        }
+    }
+
+    async function uploadFilesToSupabase(caseId) {
+        for (const file of uploadedFiles) {
+            try {
+                const fileName = `${caseId}/${Date.now()}_${file.name}`;
+                
+                const { error } = await supabase.storage
+                    .from('oficios-archivos')
+                    .upload(fileName, file);
+
+                if (error) throw error;
+
+                // Registrar en tabla de archivos
+                await supabase.from('archivos').insert([{
+                    oficios_id: caseId,
+                    nombre_archivo: file.name,
+                    ruta_archivo: fileName,
+                    tamaño: file.size,
+                    created_at: new Date().toISOString()
+                }]);
+
+            } catch (err) {
+                console.error('Error subiendo archivo:', err);
+            }
+        }
+        uploadedFiles = [];
+    }
+
+    function resetCaseForm() {
+        document.getElementById('caseNumber').value = '';
+        document.getElementById('caseName').value = '';
+        document.getElementById('prosecutor').value = '';
+        document.getElementById('receiveDate').value = '';
+        document.getElementById('victim').value = '';
+        document.getElementById('suspect').value = '';
+        document.getElementById('department').value = '';
+        document.getElementById('mainTechnician').value = '';
+        document.getElementById('secondTechnician').value = '';
+        document.getElementById('workType').value = '';
+        document.getElementById('observations').value = '';
+        document.getElementById('status').value = 'Pendiente';
+        uploadedFiles = [];
+        document.getElementById('fileList').innerHTML = '';
+        document.getElementById('fileList').style.display = 'none';
+    }
+
+    // ===== FILE UPLOAD =====
+    document.getElementById('fileInput')?.addEventListener('change', (e) => {
+        const fileList = document.getElementById('fileList');
+        uploadedFiles = Array.from(e.target.files);
+        fileList.innerHTML = '';
+        fileList.style.display = uploadedFiles.length > 0 ? 'block' : 'none';
+        
+        uploadedFiles.forEach((file, idx) => {
+            const fileItem = document.createElement('div');
+            fileItem.className = 'file-item';
+            fileItem.innerHTML = `
+                <div>
+                    <i class="fas fa-file"></i> ${file.name} (${(file.size / 1024).toFixed(2)} KB)
+                </div>
+                <button type="button" onclick="removeFile(${idx})" style="background: none; border: none; color: #ef4444; cursor: pointer;">
+                    <i class="fas fa-trash"></i>
+                </button>
+            `;
+            fileList.appendChild(fileItem);
+        });
+    });
+
+    function removeFile(idx) {
+        uploadedFiles.splice(idx, 1);
+        document.getElementById('fileInput').value = '';
+        const fileList = document.getElementById('fileList');
+        fileList.innerHTML = '';
+        fileList.style.display = uploadedFiles.length > 0 ? 'block' : 'none';
+    }
+
+    // ===== STATS & RENDER =====
+    function updateStats() {
+        document.getElementById('countPending').textContent = cases.filter(c => c.estado === 'Pendiente').length;
+        document.getElementById('countProgress').textContent = cases.filter(c => c.estado === 'En Trámite').length;
+        document.getElementById('countFinished').textContent = cases.filter(c => c.estado === 'Finalizado').length;
+        document.getElementById('countSent').textContent = cases.filter(c => c.estado === 'Remitido').length;
+    }
+
+    function renderCasesTable() {
+        const tbody = document.getElementById('casesTable');
+        const searchTerm = (document.getElementById('mainSearch')?.value || '').toLowerCase();
+        const statusFilter = document.getElementById('filterStatus')?.value || '';
+        const deptFilter = document.getElementById('filterDepartment')?.value || '';
+
+        const filtered = cases.filter(c => {
+            const matchSearch = !searchTerm || 
+                c.numero_legajo.toLowerCase().includes(searchTerm) || 
+                c.causa.toLowerCase().includes(searchTerm) || 
+                (c.victima && c.victima.toLowerCase().includes(searchTerm)) || 
+                (c.tecnico_principal && c.tecnico_principal.toLowerCase().includes(searchTerm)) ||
+                c.fiscalia.toLowerCase().includes(searchTerm);
+            const matchStatus = !statusFilter || c.estado === statusFilter;
+            const matchDept = !deptFilter || c.dependencia === deptFilter;
+            return matchSearch && matchStatus && matchDept;
+        });
+
+        tbody.innerHTML = '';
+        if (filtered.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:20px;">Sin registros</td></tr>';
+            return;
+        }
+
+        filtered.forEach(c => {
+            const statusClass = 'status-' + c.estado.replace(/\s+/g, '-').toLowerCase();
+            const row = `<tr>
+                <td><strong>${c.numero_legajo}</strong></td>
+                <td>${c.causa}</td>
+                <td>${c.fiscalia}</td>
+                <td>${c.victima || '-'}</td>
+                <td>${c.dependencia}</td>
+                <td>${c.tecnico_principal || '-'}</td>
+                <td><span class="status-badge ${statusClass}">${c.estado}</span></td>
+                <td>
+                    <div class="action-icons">
+                        <button class="icon-btn" onclick="viewCase(${c.id})" title="Ver">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="icon-btn" onclick="changeStatus(${c.id})" title="Cambiar">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>`;
+            tbody.innerHTML += row;
+        });
+    }
+
+    function viewCase(id) {
+        selectedCaseId = id;
+        const c = cases.find(x => x.id === id);
+        if (!c) return;
+
+        const content = `
+            <div class="form-section">
+                <div class="form-section-title">Información del Oficio</div>
+                <div class="form-grid">
+                    <div><strong>Legajo:</strong> ${c.numero_legajo}</div>
+                    <div><strong>Causa:</strong> ${c.causa}</div>
+                    <div><strong>Fiscalía:</strong> ${c.fiscalia}</div>
+                    <div><strong>Recepción:</strong> ${new Date(c.fecha_recepcion).toLocaleDateString('es-AR')}</div>
+                    <div><strong>Víctima:</strong> ${c.victima || '-'}</div>
+                    <div><strong>Sospechoso:</strong> ${c.causante || '-'}</div>
+                    <div><strong>Dependencia:</strong> ${c.dependencia}</div>
+                    <div><strong>Técnico:</strong> ${c.tecnico_principal || '-'}</div>
+                    <div><strong>Estado:</strong> <span class="status-badge status-${c.estado.replace(/\s+/g, '-').toLowerCase()}">${c.estado}</span></div>
+                </div>
+            </div>
+            <div class="form-section">
+                <div class="form-section-title">Trabajo</div>
+                <p>${c.tipo_trabajo || '-'}</p>
+            </div>
+            <div class="form-section">
+                <div class="form-section-title">Observaciones</div>
+                <p>${c.observaciones || '-'}</p>
+            </div>
+        `;
+        document.getElementById('caseDetailContent').innerHTML = content;
+        openModal('caseDetailModal');
+    }
+
+    async function changeStatus(id) {
+        const c = cases.find(x => x.id === id);
+        const newStatus = prompt('Nuevo estado:\n1. Pendiente\n2. En Trámite\n3. Finalizado\n4. Remitido', c.estado);
+        
+        if (newStatus && ['Pendiente', 'En Trámite', 'Finalizado', 'Remitido'].includes(newStatus)) {
+            try {
+                const { error } = await supabase
+                    .from('oficios')
+                    .update({ estado: newStatus })
+                    .eq('id', id);
+
+                if (error) throw error;
+                await loadCasesFromSupabase();
+                alert('✓ Estado actualizado');
+            } catch (err) {
+                alert('❌ Error: ' + err.message);
+            }
+        }
+    }
+
+    async function deleteCase() {
+        if (confirm('¿Eliminar este oficio?')) {
+            try {
+                const { error } = await supabase
+                    .from('oficios')
+                    .delete()
+                    .eq('id', selectedCaseId);
+
+                if (error) throw error;
+                closeModal('caseDetailModal');
+                await loadCasesFromSupabase();
+                alert('✓ Oficio eliminado');
+            } catch (err) {
+                alert('❌ Error: ' + err.message);
+            }
+        }
+    }
+
+    // ===== CONTACTS =====
+    async function submitNewContact() {
+        const contactData = {
+            nombre: document.getElementById('contactName').value,
+            email: document.getElementById('contactEmail').value,
+            telefono: document.getElementById('contactPhone').value,
+            division: document.getElementById('contactDivision').value,
+            fiscal: document.getElementById('contactPerson').value,
+            observaciones: document.getElementById('contactObservations').value,
+            created_at: new Date().toISOString()
+        };
+
+        try {
+            updateSyncStatus('⏳ Guardando contacto...');
+
+            const { error } = await supabase
+                .from('contactos')
+                .insert([contactData]);
+
+            if (error) throw error;
+
+            closeModal('newContactModal');
+            document.getElementById('contactName').value = '';
+            document.getElementById('contactEmail').value = '';
+            document.getElementById('contactPhone').value = '';
+            document.getElementById('contactDivision').value = '';
+            document.getElementById('contactPerson').value = '';
+            document.getElementById('contactObservations').value = '';
+            
+            await loadContactsFromSupabase();
+            alert('✓ Contacto guardado');
+            showSuccessSync();
+        } catch (err) {
+            alert('❌ Error: ' + err.message);
+            updateSyncStatus('❌ Error');
+        }
+    }
+
+    function loadContacts() {
+        const contactsList = document.getElementById('contactsList');
+        if (!contactsList) return;
+
+        if (contacts.length === 0) {
+            contactsList.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--gray-medium);">No hay contactos registrados.</div>';
+            return;
+        }
+
+        let html = '<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 20px;">';
+        contacts.forEach(c => {
+            const divisionLabel = c.division === 'DDTE' ? 'Delitos Telemáticos' : c.division === 'SLF' ? 'Lab. Fotográfico' : 'Ambas';
+            html += `
+                <div style="background: white; padding: 20px; border-radius: 8px; border-left: 4px solid var(--accent-cyan); box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+                    <h3 style="color: var(--primary-dark); margin-bottom: 10px; font-size: 16px;">${c.nombre}</h3>
+                    <div style="font-size: 12px; color: var(--gray-medium);">
+                        <div><strong>Email:</strong> <a href="mailto:${c.email}" style="color: var(--accent-cyan);">${c.email}</a></div>
+                        <div><strong>Teléfono:</strong> ${c.telefono || '-'}</div>
+                        <div><strong>División:</strong> <span style="background: rgba(14, 165, 233, 0.1); padding: 2px 8px; border-radius: 3px;">${divisionLabel}</span></div>
+                        <div><strong>Fiscal:</strong> ${c.fiscal || '-'}</div>
+                    </div>
+                    <div style="font-size: 12px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--gray-light);">${c.observaciones || ''}</div>
+                </div>
+            `;
+        });
+        html += '</div>';
+        contactsList.innerHTML = html;
+    }
+
+    function openSendModal(caseId) {
+        selectedCaseId = caseId;
+        const c = cases.find(x => x.id === caseId);
+        if (!c) return;
+
+        document.getElementById('caseToSend').value = c.numero_legajo + ' - ' + c.causa;
+        
+        const selectContact = document.getElementById('selectContact');
+        selectContact.innerHTML = '<option value="">-- Seleccionar contacto --</option>';
+        contacts.forEach(contact => {
+            selectContact.innerHTML += `<option value="${contact.id}">${contact.nombre} (${contact.email})</option>`;
+        });
+
+        openModal('sendCaseModal');
+    }
+
+    document.getElementById('selectContact')?.addEventListener('change', (e) => {
+        const contactId = parseInt(e.target.value);
+        const contact = contacts.find(x => x.id === contactId);
+        if (contact) {
+            document.getElementById('destinationEmail').value = contact.email;
+            const divLabel = contact.division === 'DDTE' ? 'Delitos Telemáticos' : contact.division === 'SLF' ? 'Lab. Fotográfico' : 'Ambas';
+            document.getElementById('sendDivision').value = divLabel;
+        }
+    });
+
+    function sendCaseToGmail() {
+        const caseNum = document.getElementById('caseToSend').value;
+        const destEmail = document.getElementById('destinationEmail').value;
+        const subject = document.getElementById('emailSubject').value;
+        const message = document.getElementById('emailMessage').value;
+
+        if (!destEmail || !subject || !message) {
+            alert('Por favor completa todos los campos');
+            return;
+        }
+
+        const body = `Oficio: ${caseNum}\n\n${message}\n\n---\nEnviado desde SIGOL - ${currentUser.firstName} ${currentUser.lastName}`;
+        const gmailUrl = `https://mail.google.com/mail/u/0/?view=cm&fs=1&to=${destEmail}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+        alert('✓ Se abrirá Gmail en una nueva pestaña. Verifica y envía el correo.');
+        window.open(gmailUrl, '_blank');
+        closeModal('sendCaseModal');
+    }
+
+    // ===== UI FUNCTIONS =====
+    function openModal(id) {
+        document.getElementById(id).classList.add('active');
+    }
+
+    function closeModal(id) {
+        document.getElementById(id).classList.remove('active');
+    }
+
+    function showSection(section, el) {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.getElementById('section-' + section).classList.add('active');
+        document.querySelectorAll('.sidebar-item').forEach(s => s.classList.remove('active'));
+        el.classList.add('active');
+    }
+
+    // ===== LISTENERS =====
+    document.getElementById('mainSearch')?.addEventListener('input', renderCasesTable);
+    document.getElementById('filterStatus')?.addEventListener('change', renderCasesTable);
+    document.getElementById('filterDepartment')?.addEventListener('change', renderCasesTable);
+
+    document.querySelectorAll('.modal').forEach(m => {
+        m.addEventListener('click', (e) => {
+            if (e.target === m) m.classList.remove('active');
+        });
+    });
+
+    // INIT
+    if (currentUser = JSON.parse(localStorage.getItem('sigolUser'))) {
+        initDashboard();
+    }
+</script>
+
+</body>
+</html>
