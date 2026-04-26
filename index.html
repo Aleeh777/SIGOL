@@ -414,8 +414,14 @@
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+const SUPABASE_URL = 'https://gmbhptqijgrlxosfskva.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdtYmhwdHFpamdybHhvc2Zza3ZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwNjIyNTAsImV4cCI6MjA5MjYzODI1MH0.FQRwIjvLeXUaNM_Vx2R2KLuYJyWgNrjmuP85QTdRBLY';
 const PASSWORD = '3813';
+
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
 let currentUser = null;
 let cases = [];
 let contacts = [];
@@ -526,19 +532,52 @@ function doLogout() {
 }
 
 function loadData() {
-    const stored = localStorage.getItem('sigolCases');
-    if (stored) {
-        cases = JSON.parse(stored);
+    // Intentar cargar desde Supabase primero
+    loadFromSupabase();
+}
+
+async function loadFromSupabase() {
+    try {
+        const { data: casesData, error: casesError } = await supabase.from('oficios').select('*');
+        const { data: contactsData, error: contactsError } = await supabase.from('contactos').select('*');
+        
+        if (casesError) {
+            console.log('Error cargando oficios:', casesError);
+            // Si falla Supabase, usar localStorage como respaldo
+            const stored = localStorage.getItem('sigolCases');
+            cases = stored ? JSON.parse(stored) : [];
+        } else {
+            cases = casesData || [];
+            // Guardar en localStorage como backup
+            localStorage.setItem('sigolCases', JSON.stringify(cases));
+        }
+
+        if (contactsError) {
+            console.log('Error cargando contactos:', contactsError);
+            const contactsStored = localStorage.getItem('sigolContacts');
+            contacts = contactsStored ? JSON.parse(contactsStored) : [];
+        } else {
+            contacts = contactsData || [];
+            localStorage.setItem('sigolContacts', JSON.stringify(contacts));
+        }
+        
+        updateStats();
+        renderTable();
+        renderCasesList();
+        loadContacts();
+    } catch (err) {
+        console.error('Error general:', err);
+        // Si hay error, usar localStorage
+        const stored = localStorage.getItem('sigolCases');
+        cases = stored ? JSON.parse(stored) : [];
+        const contactsStored = localStorage.getItem('sigolContacts');
+        contacts = contactsStored ? JSON.parse(contactsStored) : [];
+        
+        updateStats();
+        renderTable();
+        renderCasesList();
+        loadContacts();
     }
-    const contactsStored = localStorage.getItem('sigolContacts');
-    if (contactsStored) {
-        contacts = JSON.parse(contactsStored);
-    }
-    
-    updateStats();
-    renderTable();
-    renderCasesList();
-    loadContacts();
 }
 
 function updateStats() {
@@ -632,7 +671,6 @@ function renderCasesList() {
 
 function saveCase() {
     const data = {
-        id: editingCaseId || Date.now(),
         numero_legajo: document.getElementById('caseNumber').value,
         causa: document.getElementById('caseName').value,
         fiscalia: document.getElementById('prosecutor').value,
@@ -644,22 +682,31 @@ function saveCase() {
         estado: document.getElementById('status').value,
         archivos: uploadedFiles.map(f => f.name),
         usuario_creador: currentUser.firstName,
-        created_at: editingCaseId ? cases.find(c => c.id === editingCaseId).created_at : new Date().toISOString(),
+        created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
     };
 
-    if (editingCaseId) {
-        const index = cases.findIndex(c => c.id === editingCaseId);
-        if (index !== -1) cases[index] = data;
-    } else {
-        cases.push(data);
-    }
+    saveToSupabase(data);
+}
 
-    localStorage.setItem('sigolCases', JSON.stringify(cases));
-    closeModal('newCaseModal');
-    resetForm();
-    loadData();
-    alert('✓ Guardado');
+async function saveToSupabase(data) {
+    try {
+        if (editingCaseId) {
+            const { error } = await supabase.from('oficios').update(data).eq('id', editingCaseId);
+            if (error) throw error;
+        } else {
+            const { error } = await supabase.from('oficios').insert([data]);
+            if (error) throw error;
+        }
+
+        closeModal('newCaseModal');
+        resetForm();
+        await loadFromSupabase();
+        alert('✓ Guardado en Supabase');
+    } catch (err) {
+        console.error('Error guardando:', err);
+        alert('Error: ' + err.message);
+    }
 }
 
 function editCase(caseId) {
@@ -694,16 +741,23 @@ function editStatus(caseId) {
     const nextIndex = (currentIndex + 1) % estados.length;
     const newStatus = estados[nextIndex];
 
-    caseItem.estado = newStatus;
-    caseItem.updated_at = new Date().toISOString();
-    localStorage.setItem('sigolCases', JSON.stringify(cases));
-    loadData();
-    alert(`✓ ${newStatus}`);
+    updateStatusInSupabase(caseId, newStatus);
+}
+
+async function updateStatusInSupabase(caseId, newStatus) {
+    try {
+        const { error } = await supabase.from('oficios').update({ estado: newStatus, updated_at: new Date().toISOString() }).eq('id', caseId);
+        if (error) throw error;
+        await loadFromSupabase();
+        alert(`✓ ${newStatus}`);
+    } catch (err) {
+        console.error('Error actualizando:', err);
+        alert('Error: ' + err.message);
+    }
 }
 
 function saveContact() {
     const data = {
-        id: Date.now(),
         nombre: document.getElementById('contactName').value,
         email: document.getElementById('contactEmail').value,
         telefono: document.getElementById('contactPhone').value,
@@ -711,14 +765,23 @@ function saveContact() {
         created_at: new Date().toISOString()
     };
 
-    contacts.push(data);
-    localStorage.setItem('sigolContacts', JSON.stringify(contacts));
-    closeModal('newContactModal');
-    document.getElementById('contactName').value = '';
-    document.getElementById('contactEmail').value = '';
-    document.getElementById('contactPhone').value = '';
-    loadData();
-    alert('✓ Guardado');
+    saveContactToSupabase(data);
+}
+
+async function saveContactToSupabase(data) {
+    try {
+        const { error } = await supabase.from('contactos').insert([data]);
+        if (error) throw error;
+        closeModal('newContactModal');
+        document.getElementById('contactName').value = '';
+        document.getElementById('contactEmail').value = '';
+        document.getElementById('contactPhone').value = '';
+        await loadFromSupabase();
+        alert('✓ Guardado');
+    } catch (err) {
+        console.error('Error guardando contacto:', err);
+        alert('Error: ' + err.message);
+    }
 }
 
 function loadContacts() {
