@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SIGOL - PDT Tucumán</title>
+    <title>SIGOL</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -92,6 +92,18 @@
         .form-group label { font-size: 12px; font-weight: 600; text-transform: uppercase; color: #1a3a52; margin-bottom: 8px; }
         .form-group input, .form-group select, .form-group textarea { padding: 10px 12px; border: 1px solid #e5e7eb; border-radius: 4px; font-size: 13px; font-family: inherit; background: white; }
         .form-group textarea { min-height: 80px; resize: vertical; }
+
+        .file-upload-area { border: 2px dashed #0ea5e9; border-radius: 6px; padding: 20px; text-align: center; cursor: pointer; }
+        .file-list { margin-top: 15px; }
+        .file-item { background: #f0fdf4; padding: 12px; border-radius: 4px; border-left: 4px solid #10b981; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+
+        .case-detail { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+        .case-detail-header { border-bottom: 2px solid #e5e7eb; padding-bottom: 15px; margin-bottom: 15px; }
+        .case-detail-title { font-size: 16px; font-weight: 700; color: #1a3a52; }
+        .case-detail-info { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px; }
+        .info-block { display: flex; flex-direction: column; }
+        .info-label { font-size: 11px; color: #6b7280; font-weight: 600; text-transform: uppercase; margin-bottom: 5px; }
+        .info-value { font-size: 14px; color: #1a3a52; font-weight: 500; }
     </style>
 </head>
 <body>
@@ -201,12 +213,13 @@
                                 <th>Causa</th>
                                 <th>Fiscalía</th>
                                 <th>División</th>
+                                <th>Técnico Asignado</th>
                                 <th>Estado</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody id="casesTable">
-                            <tr><td colspan="5" style="text-align:center;padding:20px;">Sin oficios</td></tr>
+                            <tr><td colspan="7" style="text-align:center;padding:20px;">Sin oficios</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -218,10 +231,10 @@
                 <button class="btn btn-primary" onclick="openModal('newCaseModal')"><i class="fas fa-plus"></i> Crear</button>
             </div>
 
-            <!-- CASES -->
+            <!-- CASES LIST -->
             <div id="section-cases" class="section">
                 <h2 style="color:#1a3a52;margin-bottom:20px;">Oficios</h2>
-                <div style="background:white;padding:20px;border-radius:8px;" id="casesList"></div>
+                <div id="casesList" style="background:white;padding:20px;border-radius:8px;"></div>
             </div>
 
             <!-- CONTACTS -->
@@ -236,12 +249,12 @@
                         <div style="background: #f9fafb; padding: 12px; border-radius: 6px; margin-bottom: 15px;">
                             <div style="font-size: 12px; color: #6b7280; font-weight: 600; margin-bottom: 5px;">EMAIL OFICIAL:</div>
                             <div style="font-size: 14px; color: #0ea5e9; word-break: break-all;">
-                                <a href="mailto:telematico@brigada.gov.ar" style="color: #0ea5e9; text-decoration: none;">telematico@brigada.gov.ar</a>
+                                <a href="mailto:divdtelematicos@outlook.com" style="color: #0ea5e9; text-decoration: none;">divdtelematicos@outlook.com</a>
                             </div>
                         </div>
 
                         <div style="display: flex; gap: 10px;">
-                            <button class="btn" style="padding: 10px 16px; font-size: 12px; background: linear-gradient(135deg, #1a3a52 0%, #2a4f6f 100%); color: white; border: none; border-radius: 6px; cursor: pointer; flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px;" onclick="window.open('https://mail.google.com', '_blank')">
+                            <button class="btn" style="padding: 10px 16px; font-size: 12px; background: linear-gradient(135deg, #1a3a52 0%, #2a4f6f 100%); color: white; border: none; border-radius: 6px; cursor: pointer; flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px;" onclick="window.open('https://outlook.live.com', '_blank')">
                                 <i class="fas fa-envelope"></i> Gmail
                             </button>
                             <button class="btn" style="padding: 10px 16px; font-size: 12px; background: #0ea5e9; color: white; border: none; border-radius: 6px; cursor: pointer; flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px;" onclick="window.open('https://drive.google.com', '_blank')">
@@ -257,12 +270,12 @@
                         <div style="background: #f9fafb; padding: 12px; border-radius: 6px; margin-bottom: 15px;">
                             <div style="font-size: 12px; color: #6b7280; font-weight: 600; margin-bottom: 5px;">EMAIL OFICIAL:</div>
                             <div style="font-size: 14px; color: #f59e0b; word-break: break-all;">
-                                <a href="mailto:laboratorio@brigada.gov.ar" style="color: #f59e0b; text-decoration: none;">laboratorio@brigada.gov.ar</a>
+                                <a href="mailto:laboratorio@outlook.com" style="color: #f59e0b; text-decoration: none;">laboratorio@outlook.com</a>
                             </div>
                         </div>
 
                         <div style="display: flex; gap: 10px;">
-                            <button class="btn" style="padding: 10px 16px; font-size: 12px; background: linear-gradient(135deg, #1a3a52 0%, #2a4f6f 100%); color: white; border: none; border-radius: 6px; cursor: pointer; flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px;" onclick="window.open('https://mail.google.com', '_blank')">
+                            <button class="btn" style="padding: 10px 16px; font-size: 12px; background: linear-gradient(135deg, #1a3a52 0%, #2a4f6f 100%); color: white; border: none; border-radius: 6px; cursor: pointer; flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px;" onclick="window.open('https://outlook.live.com', '_blank')">
                                 <i class="fas fa-envelope"></i> Gmail
                             </button>
                             <button class="btn" style="padding: 10px 16px; font-size: 12px; background: #f59e0b; color: white; border: none; border-radius: 6px; cursor: pointer; flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px;" onclick="window.open('https://drive.google.com', '_blank')">
@@ -286,12 +299,12 @@
 <div class="modal" id="newCaseModal">
     <div class="modal-content">
         <div class="modal-header">
-            <div class="modal-title">Crear Oficio</div>
+            <div class="modal-title" id="modalTitle">Crear Oficio</div>
             <button class="modal-close" onclick="closeModal('newCaseModal')">&times;</button>
         </div>
         <div class="modal-body">
             <div class="form-section">
-                <div class="form-section-title">Información</div>
+                <div class="form-section-title">Información Básica</div>
                 <div class="form-grid">
                     <div class="form-group"><label>Legajo</label><input type="text" id="caseNumber" placeholder="2024-001"></div>
                     <div class="form-group"><label>Causa</label><input type="text" id="caseName" placeholder="Fraude"></div>
@@ -307,20 +320,22 @@
                 </div>
             </div>
             <div class="form-section">
-                <div class="form-section-title">Archivos Adjuntos</div>
-                <div style="border: 2px dashed #0ea5e9; border-radius: 6px; padding: 20px; text-align: center; cursor: pointer;" id="fileUploadArea">
+                <div class="form-section-title">Asignación</div>
+                <div class="form-grid">
+                    <div class="form-group"><label>División</label><select id="department"><option value="TELEMATICO">Delitos Telemáticos</option><option value="LABORATORIO">Laboratorio Fotográfico</option></select></div>
+                    <div class="form-group"><label>Técnico Principal</label><input type="text" id="mainTechnician" placeholder="Nombre del técnico"></div>
+                    <div class="form-group"><label>Estado</label><select id="status"><option value="Pendiente">Pendiente</option><option value="En Trámite">En Trámite</option><option value="Finalizado">Finalizado</option></select></div>
+                </div>
+            </div>
+            <div class="form-section">
+                <div class="form-section-title">Archivos</div>
+                <div class="file-upload-area" id="fileUploadArea">
                     <i class="fas fa-cloud-upload-alt" style="font-size: 32px; color: #0ea5e9; margin-bottom: 10px; display: block;"></i>
                     <div style="font-weight: 500; color: #374151; margin-bottom: 5px;">Arrastra PDF o Word aquí</div>
                     <div style="font-size: 12px; color: #6b7280;">O haz clic para seleccionar</div>
                     <input type="file" id="fileInput" accept=".pdf,.doc,.docx" style="display: none;">
                 </div>
-                <div id="fileList" style="margin-top: 15px;"></div>
-            </div>
-                <div class="form-grid">
-                    <div class="form-group"><label>División</label><select id="department"><option value="TELEMATICO">Delitos Telemáticos</option><option value="LABORATORIO">Laboratorio Fotográfico</option></select></div>
-                    <div class="form-group"><label>Técnico</label><input type="text" id="mainTechnician"></div>
-                    <div class="form-group"><label>Estado</label><select id="status"><option value="Pendiente">Pendiente</option><option value="En Trámite">En Trámite</option><option value="Finalizado">Finalizado</option></select></div>
-                </div>
+                <div class="file-list" id="fileList"></div>
             </div>
         </div>
         <div class="modal-footer">
@@ -340,7 +355,7 @@
         <div class="modal-body">
             <div class="form-section">
                 <div class="form-grid">
-                    <div class="form-group"><label>Fiscalía</label><input type="text" id="contactName"></div>
+                    <div class="form-group"><label>Nombre</label><input type="text" id="contactName"></div>
                     <div class="form-group"><label>Email</label><input type="email" id="contactEmail"></div>
                     <div class="form-group"><label>Teléfono</label><input type="text" id="contactPhone"></div>
                     <div class="form-group"><label>División</label><select id="contactDivision"><option value="TELEMATICO">Delitos Telemáticos</option><option value="LABORATORIO">Laboratorio Fotográfico</option></select></div>
@@ -359,7 +374,8 @@ const PASSWORD = '3813';
 let currentUser = null;
 let cases = [];
 let contacts = [];
-let uploadedFile = null;
+let uploadedFiles = [];
+let editingCaseId = null;
 
 // FILE UPLOAD
 document.addEventListener('DOMContentLoaded', function() {
@@ -370,19 +386,51 @@ document.addEventListener('DOMContentLoaded', function() {
         fileUploadArea.addEventListener('click', () => fileInput.click());
         
         fileInput.addEventListener('change', (e) => {
-            if (e.target.files[0]) {
-                uploadedFile = e.target.files[0];
-                const fileList = document.getElementById('fileList');
-                fileList.innerHTML = `
-                    <div style="background: #f0fdf4; padding: 12px; border-radius: 4px; border-left: 4px solid #10b981;">
-                        <i class="fas fa-file-pdf" style="color: #ef4444;"></i> ${uploadedFile.name}
-                        <div style="font-size: 12px; color: #6b7280; margin-top: 5px;">${(uploadedFile.size / 1024).toFixed(2)} KB</div>
-                    </div>
-                `;
+            if (e.target.files) {
+                uploadedFiles = Array.from(e.target.files);
+                renderFileList();
             }
+        });
+
+        fileUploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            fileUploadArea.style.background = '#f0fdf4';
+        });
+
+        fileUploadArea.addEventListener('dragleave', () => {
+            fileUploadArea.style.background = 'transparent';
+        });
+
+        fileUploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            fileUploadArea.style.background = 'transparent';
+            uploadedFiles = Array.from(e.dataTransfer.files);
+            renderFileList();
         });
     }
 });
+
+function renderFileList() {
+    const fileList = document.getElementById('fileList');
+    fileList.innerHTML = '';
+    uploadedFiles.forEach((file, index) => {
+        fileList.innerHTML += `
+            <div class="file-item">
+                <div>
+                    <i class="fas fa-file-pdf" style="color: #ef4444; margin-right: 8px;"></i> 
+                    ${file.name}
+                    <div style="font-size: 12px; color: #6b7280; margin-top: 5px;">${(file.size / 1024).toFixed(2)} KB</div>
+                </div>
+                <button onclick="removeFile(${index})" style="background: none; border: none; color: #ef4444; cursor: pointer; font-size: 18px;">✕</button>
+            </div>
+        `;
+    });
+}
+
+function removeFile(index) {
+    uploadedFiles.splice(index, 1);
+    renderFileList();
+}
 
 function doLogin() {
     const firstName = document.getElementById('firstName').value.trim();
@@ -442,6 +490,7 @@ function loadFromLocalStorage() {
     
     updateStats();
     renderTable();
+    renderCasesList();
     loadContacts();
 }
 
@@ -456,21 +505,6 @@ function filterCases() {
     renderTable();
 }
 
-function editStatus(caseId) {
-    const caseItem = cases.find(c => c.id === caseId);
-    if (!caseItem) return;
-
-    const estados = ['Pendiente', 'En Trámite', 'Finalizado'];
-    const currentIndex = estados.indexOf(caseItem.estado);
-    const nextIndex = (currentIndex + 1) % estados.length;
-    const newStatus = estados[nextIndex];
-
-    caseItem.estado = newStatus;
-    localStorage.setItem('sigolCases', JSON.stringify(cases));
-    loadFromLocalStorage();
-    alert(`✓ Estado actualizado a: ${newStatus}`);
-}
-
 function renderTable() {
     const search = (document.getElementById('mainSearch')?.value || '').toLowerCase();
     const statusFilter = document.getElementById('filterStatus')?.value || '';
@@ -483,7 +517,7 @@ function renderTable() {
     const tbody = document.getElementById('casesTable');
     tbody.innerHTML = '';
     if (filtered.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;">Sin oficios</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:20px;">Sin oficios</td></tr>';
         return;
     }
 
@@ -494,20 +528,76 @@ function renderTable() {
             <td>${c.causa}</td>
             <td>${c.fiscalia}</td>
             <td>${c.dependencia}</td>
+            <td>${c.tecnico_principal || '-'}</td>
             <td><span class="status-badge ${st}">${c.estado}</span></td>
-            <td>
-                <button class="btn" style="padding: 6px 12px; font-size: 11px; background: #0ea5e9; color: white; border-radius: 4px;" onclick="editStatus(${c.id})">
-                    <i class="fas fa-edit"></i> Cambiar
+            <td style="display: flex; gap: 8px;">
+                <button class="btn" style="padding: 6px 12px; font-size: 11px; background: #0ea5e9; color: white; border-radius: 4px; border: none; cursor: pointer;" onclick="editCase(${c.id})">
+                    <i class="fas fa-edit"></i> Editar
                 </button>
-                ${c.archivo ? `<div style="font-size: 11px; color: #0ea5e9; margin-top: 5px;"><i class="fas fa-file-pdf"></i> ${c.archivo}</div>` : ''}
+                <button class="btn" style="padding: 6px 12px; font-size: 11px; background: #10b981; color: white; border-radius: 4px; border: none; cursor: pointer;" onclick="editStatus(${c.id})">
+                    <i class="fas fa-check"></i> Estado
+                </button>
             </td>
         </tr>`;
     });
 }
 
+function renderCasesList() {
+    const casesList = document.getElementById('casesList');
+    if (cases.length === 0) {
+        casesList.innerHTML = '<p style="text-align:center;color:#999;">Sin oficios registrados</p>';
+        return;
+    }
+
+    let html = '';
+    cases.forEach(c => {
+        const st = 'status-' + c.estado.replace(/\s/g, '-').toLowerCase();
+        html += `
+            <div class="case-detail">
+                <div class="case-detail-header">
+                    <div class="case-detail-title">${c.numero_legajo} - ${c.causa}</div>
+                </div>
+                <div class="case-detail-info">
+                    <div class="info-block">
+                        <div class="info-label">Fiscalía</div>
+                        <div class="info-value">${c.fiscalia}</div>
+                    </div>
+                    <div class="info-block">
+                        <div class="info-label">División</div>
+                        <div class="info-value">${c.dependencia}</div>
+                    </div>
+                    <div class="info-block">
+                        <div class="info-label">Técnico Asignado</div>
+                        <div class="info-value">${c.tecnico_principal || '-'}</div>
+                    </div>
+                    <div class="info-block">
+                        <div class="info-label">Estado</div>
+                        <div><span class="status-badge ${st}">${c.estado}</span></div>
+                    </div>
+                </div>
+                ${c.archivos && c.archivos.length > 0 ? `
+                    <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #e5e7eb;">
+                        <div style="font-size: 12px; font-weight: 600; color: #1a3a52; margin-bottom: 10px;">📎 ARCHIVOS ADJUNTOS:</div>
+                        ${c.archivos.map(arch => `<div style="font-size: 12px; color: #0ea5e9; margin-bottom: 5px;"><i class="fas fa-file-pdf"></i> ${arch}</div>`).join('')}
+                    </div>
+                ` : ''}
+                <div style="margin-top: 15px; display: flex; gap: 10px;">
+                    <button class="btn" style="padding: 8px 16px; font-size: 12px; background: #0ea5e9; color: white; border-radius: 4px; border: none; cursor: pointer;" onclick="editCase(${c.id})">
+                        <i class="fas fa-edit"></i> Editar
+                    </button>
+                    <button class="btn" style="padding: 8px 16px; font-size: 12px; background: #10b981; color: white; border-radius: 4px; border: none; cursor: pointer;" onclick="editStatus(${c.id})">
+                        <i class="fas fa-exchange"></i> Cambiar Estado
+                    </button>
+                </div>
+            </div>
+        `;
+    });
+    casesList.innerHTML = html;
+}
+
 function saveCase() {
     const data = {
-        id: Date.now(),
+        id: editingCaseId || Date.now(),
         numero_legajo: document.getElementById('caseNumber').value,
         causa: document.getElementById('caseName').value,
         fiscalia: document.getElementById('prosecutor').value,
@@ -517,19 +607,73 @@ function saveCase() {
         dependencia: document.getElementById('department').value,
         tecnico_principal: document.getElementById('mainTechnician').value,
         estado: document.getElementById('status').value,
-        archivo: uploadedFile ? uploadedFile.name : null,
+        archivos: uploadedFiles.map(f => f.name),
         usuario_creador: currentUser.firstName,
-        created_at: new Date().toISOString()
+        created_at: editingCaseId ? cases.find(c => c.id === editingCaseId).created_at : new Date().toISOString(),
+        updated_at: new Date().toISOString()
     };
 
-    cases.push(data);
+    if (editingCaseId) {
+        const index = cases.findIndex(c => c.id === editingCaseId);
+        if (index !== -1) {
+            cases[index] = data;
+        }
+    } else {
+        cases.push(data);
+    }
+
     localStorage.setItem('sigolCases', JSON.stringify(cases));
     closeModal('newCaseModal');
-    uploadedFile = null;
-    document.getElementById('fileInput').value = '';
-    document.getElementById('fileList').innerHTML = '';
+    resetForm();
     loadFromLocalStorage();
-    alert('✓ Oficio guardado correctamente');
+    alert('✓ Oficio ' + (editingCaseId ? 'actualizado' : 'guardado') + ' correctamente');
+}
+
+function editCase(caseId) {
+    const caseItem = cases.find(c => c.id === caseId);
+    if (!caseItem) return;
+
+    editingCaseId = caseId;
+    document.getElementById('modalTitle').textContent = 'Editar Oficio';
+    
+    document.getElementById('caseNumber').value = caseItem.numero_legajo;
+    document.getElementById('caseName').value = caseItem.causa;
+    document.getElementById('prosecutor').value = caseItem.fiscalia;
+    document.getElementById('receiveDate').value = caseItem.fecha_recepcion;
+    document.getElementById('victim').value = caseItem.victima;
+    document.getElementById('suspect').value = caseItem.causante;
+    document.getElementById('department').value = caseItem.dependencia;
+    document.getElementById('mainTechnician').value = caseItem.tecnico_principal;
+    document.getElementById('status').value = caseItem.estado;
+
+    uploadedFiles = [];
+    document.getElementById('fileList').innerHTML = '';
+    if (caseItem.archivos) {
+        document.getElementById('fileList').innerHTML = `
+            <div style="background: #f9fafb; padding: 10px; border-radius: 4px; margin-top: 10px;">
+                <div style="font-size: 12px; font-weight: 600; color: #1a3a52; margin-bottom: 8px;">Archivos actuales:</div>
+                ${caseItem.archivos.map(arch => `<div style="font-size: 12px; color: #0ea5e9; margin-bottom: 4px;"><i class="fas fa-file-pdf"></i> ${arch}</div>`).join('')}
+            </div>
+        `;
+    }
+
+    openModal('newCaseModal');
+}
+
+function editStatus(caseId) {
+    const caseItem = cases.find(c => c.id === caseId);
+    if (!caseItem) return;
+
+    const estados = ['Pendiente', 'En Trámite', 'Finalizado'];
+    const currentIndex = estados.indexOf(caseItem.estado);
+    const nextIndex = (currentIndex + 1) % estados.length;
+    const newStatus = estados[nextIndex];
+
+    caseItem.estado = newStatus;
+    caseItem.updated_at = new Date().toISOString();
+    localStorage.setItem('sigolCases', JSON.stringify(cases));
+    loadFromLocalStorage();
+    alert(`✓ Estado actualizado a: ${newStatus}`);
 }
 
 function saveContact() {
@@ -545,6 +689,9 @@ function saveContact() {
     contacts.push(data);
     localStorage.setItem('sigolContacts', JSON.stringify(contacts));
     closeModal('newContactModal');
+    document.getElementById('contactName').value = '';
+    document.getElementById('contactEmail').value = '';
+    document.getElementById('contactPhone').value = '';
     loadFromLocalStorage();
     alert('✓ Contacto guardado');
 }
@@ -552,7 +699,7 @@ function saveContact() {
 function loadContacts() {
     const list = document.getElementById('contactsList');
     if (contacts.length === 0) {
-        list.innerHTML = '<p style="text-align:center;color:#999;">Sin contactos</p>';
+        list.innerHTML = '<p style="text-align:center;color:#999;">Sin contactos adicionales</p>';
         return;
     }
     let html = '';
@@ -560,6 +707,22 @@ function loadContacts() {
         html += `<div style="background:#f9fafb;padding:15px;margin-bottom:10px;border-radius:6px;border-left:4px solid #0ea5e9;"><strong>${c.nombre}</strong><br>📧 <a href="mailto:${c.email}">${c.email}</a><br>📱 ${c.telefono || '-'} | ${c.division}</div>`;
     });
     list.innerHTML = html;
+}
+
+function resetForm() {
+    editingCaseId = null;
+    document.getElementById('modalTitle').textContent = 'Crear Oficio';
+    document.getElementById('caseNumber').value = '';
+    document.getElementById('caseName').value = '';
+    document.getElementById('prosecutor').value = '';
+    document.getElementById('receiveDate').value = '';
+    document.getElementById('victim').value = '';
+    document.getElementById('suspect').value = '';
+    document.getElementById('mainTechnician').value = '';
+    document.getElementById('status').value = 'Pendiente';
+    uploadedFiles = [];
+    document.getElementById('fileInput').value = '';
+    document.getElementById('fileList').innerHTML = '';
 }
 
 function openModal(id) { document.getElementById(id).classList.add('active'); }
