@@ -121,9 +121,9 @@
         .info-label { font-size: 10px; color: #6b7280; font-weight: 600; text-transform: uppercase; margin-bottom: 3px; }
         .info-value { font-size: 13px; color: #1a3a52; font-weight: 500; }
 
-        /* CONTACTOS - GRID RESPONSIVO */
+        /* CONTACTOS */
         .contacts-grid { display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 20px; }
-        .contact-card { background: white; padding: 14px; border-radius: 8px; border-left: 4px solid #0ea5e9; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08); }
+        .contact-card { background: white; padding: 14px; border-radius: 8px; border-left: 4px solid #0ea5e9; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08); }
         .contact-title { font-size: 14px; font-weight: 700; color: #1a3a52; margin-bottom: 10px; }
         .contact-email { background: #f9fafb; padding: 8px; border-radius: 6px; margin-bottom: 10px; }
         .contact-email-label { font-size: 10px; color: #6b7280; font-weight: 600; margin-bottom: 4px; }
@@ -156,6 +156,10 @@
             .login-box { padding: 30px 20px; }
             .login-logo { font-size: 36px; }
         }
+
+        .loading { opacity: 0.5; pointer-events: none; }
+        .sync-indicator { display: inline-block; width: 8px; height: 8px; background: #10b981; border-radius: 50%; margin-left: 6px; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
     </style>
 </head>
 <body>
@@ -191,7 +195,7 @@
 <!-- DASHBOARD -->
 <div id="dashboardScreen">
     <div class="dashboard-header">
-        <div class="header-title">SIGOL</div>
+        <div class="header-title">SIGOL <span class="sync-indicator"></span></div>
         <div class="header-user">
             <div class="user-info">
                 <span class="user-name" id="userFullName">Usuario</span>
@@ -254,7 +258,7 @@
 
                 <div class="action-buttons">
                     <button class="btn btn-primary" onclick="openModal('newCaseModal')"><i class="fas fa-plus"></i> Nuevo</button>
-                    <button class="btn btn-secondary" onclick="loadFromLocalStorage()"><i class="fas fa-sync"></i> Sync</button>
+                    <button class="btn btn-secondary" onclick="loadFromSupabase()"><i class="fas fa-sync"></i> Sync</button>
                 </div>
 
                 <div class="cases-table">
@@ -268,7 +272,7 @@
                             </tr>
                         </thead>
                         <tbody id="casesTable">
-                            <tr><td colspan="4" style="text-align:center;padding:12px;">Sin oficios</td></tr>
+                            <tr><td colspan="4" style="text-align:center;padding:12px;">Cargando...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -291,7 +295,6 @@
                 <h2 style="color:#1a3a52;margin-bottom:16px;font-size:16px;">📧 Contactos</h2>
                 
                 <div class="contacts-grid">
-                    <!-- DELITOS TELEMÁTICOS -->
                     <div class="contact-card">
                         <div class="contact-title">🔐 Delitos Telemáticos</div>
                         <div class="contact-email">
@@ -310,7 +313,6 @@
                         </div>
                     </div>
 
-                    <!-- LABORATORIO -->
                     <div class="contact-card" style="border-left-color: #f59e0b;">
                         <div class="contact-title">📸 Laboratorio Fotográfico</div>
                         <div class="contact-email">
@@ -332,7 +334,7 @@
 
                 <h3 style="color:#1a3a52;margin-top:20px;margin-bottom:14px;font-size:14px;">📋 Adicionales</h3>
                 <div class="action-buttons">
-                    <button class="btn btn-primary" style="width:100%;" onclick="openModal('newContactModal')"><i class="fas fa-plus"></i> Agregar Contacto</button>
+                    <button class="btn btn-primary" style="width:100%;" onclick="openModal('newContactModal')"><i class="fas fa-plus"></i> Agregar</button>
                 </div>
                 <div id="contactsList"></div>
             </div>
@@ -414,8 +416,14 @@
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+const SUPABASE_URL = 'https://gmbhptqijgrlxosfskva.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdtYmhwdHFpamdybHhvc2Zza3ZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwNjIyNTAsImV4cCI6MjA5MjYzODI1MH0.FQRwIjvLeXUaNM_Vx2R2KLuYJyWgNrjmuP85QTdRBLY';
 const PASSWORD = '3813';
+
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
 let currentUser = null;
 let cases = [];
 let contacts = [];
@@ -480,7 +488,7 @@ function removeFile(index) {
 }
 
 function downloadFile(filename) {
-    alert(`📥 ${filename}\n\nCon Supabase, podrás descargar directamente.`);
+    alert(`📥 ${filename}\n\nPróximamente con integración de almacenamiento.`);
 }
 
 function doLogin() {
@@ -517,7 +525,7 @@ function doLogin() {
     document.getElementById('userFullName').textContent = firstName + ' ' + lastName;
     document.getElementById('userPosition').textContent = 'Legajo #' + legajo;
 
-    loadFromLocalStorage();
+    loadFromSupabase();
 }
 
 function doLogout() {
@@ -529,16 +537,25 @@ function doLogout() {
     }
 }
 
-function loadFromLocalStorage() {
-    const stored = localStorage.getItem('sigolCases');
-    if (stored) cases = JSON.parse(stored);
-    const contactsStored = localStorage.getItem('sigolContacts');
-    if (contactsStored) contacts = JSON.parse(contactsStored);
-    
-    updateStats();
-    renderTable();
-    renderCasesList();
-    loadContacts();
+async function loadFromSupabase() {
+    try {
+        const { data: casesData, error: casesError } = await supabase.from('oficios').select('*');
+        const { data: contactsData, error: contactsError } = await supabase.from('contactos').select('*');
+        
+        if (casesError) throw casesError;
+        if (contactsError) throw contactsError;
+        
+        cases = casesData || [];
+        contacts = contactsData || [];
+        
+        updateStats();
+        renderTable();
+        renderCasesList();
+        loadContacts();
+    } catch (err) {
+        console.error('Error:', err);
+        alert('Error cargando datos: ' + err.message);
+    }
 }
 
 function updateStats() {
@@ -616,17 +633,6 @@ function renderCasesList() {
                         <div><span class="status-badge ${st}">${c.estado}</span></div>
                     </div>
                 </div>
-                ${c.archivos && c.archivos.length > 0 ? `
-                    <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e5e7eb;">
-                        <div style="font-size: 11px; font-weight: 600; color: #1a3a52; margin-bottom: 8px;">📎 Archivos:</div>
-                        ${c.archivos.map(arch => `
-                            <div style="font-size: 11px; color: #0ea5e9; margin-bottom: 6px; padding: 6px; background: #f9fafb; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
-                                <span><i class="fas fa-file-pdf"></i> ${arch.substring(0, 20)}</span>
-                                <button onclick="downloadFile('${arch}')" style="background: #0ea5e9; color: white; border: none; padding: 2px 6px; border-radius: 3px; cursor: pointer; font-size: 10px;">↓</button>
-                            </div>
-                        `).join('')}
-                    </div>
-                ` : ''}
                 <div style="margin-top: 12px; display: flex; gap: 6px;">
                     <button class="btn btn-primary" style="flex:1;padding:8px;font-size:11px;" onclick="editCase(${c.id})">
                         <i class="fas fa-edit"></i> Editar
@@ -641,9 +647,8 @@ function renderCasesList() {
     casesList.innerHTML = html;
 }
 
-function saveCase() {
+async function saveCase() {
     const data = {
-        id: editingCaseId || Date.now(),
         numero_legajo: document.getElementById('caseNumber').value,
         causa: document.getElementById('caseName').value,
         fiscalia: document.getElementById('prosecutor').value,
@@ -655,22 +660,26 @@ function saveCase() {
         estado: document.getElementById('status').value,
         archivos: uploadedFiles.map(f => f.name),
         usuario_creador: currentUser.firstName,
-        created_at: editingCaseId ? cases.find(c => c.id === editingCaseId).created_at : new Date().toISOString(),
+        created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
     };
 
-    if (editingCaseId) {
-        const index = cases.findIndex(c => c.id === editingCaseId);
-        if (index !== -1) cases[index] = data;
-    } else {
-        cases.push(data);
-    }
+    try {
+        if (editingCaseId) {
+            const { error } = await supabase.from('oficios').update(data).eq('id', editingCaseId);
+            if (error) throw error;
+        } else {
+            const { error } = await supabase.from('oficios').insert([data]);
+            if (error) throw error;
+        }
 
-    localStorage.setItem('sigolCases', JSON.stringify(cases));
-    closeModal('newCaseModal');
-    resetForm();
-    loadFromLocalStorage();
-    alert('✓ Guardado');
+        closeModal('newCaseModal');
+        resetForm();
+        await loadFromSupabase();
+        alert('✓ Guardado en Supabase');
+    } catch (err) {
+        alert('❌ Error: ' + err.message);
+    }
 }
 
 function editCase(caseId) {
@@ -692,24 +701,11 @@ function editCase(caseId) {
 
     uploadedFiles = [];
     document.getElementById('fileList').innerHTML = '';
-    if (caseItem.archivos && caseItem.archivos.length > 0) {
-        document.getElementById('fileList').innerHTML = `
-            <div style="background: #f9fafb; padding: 10px; border-radius: 6px; margin-top: 10px; border-left: 4px solid #0ea5e9;">
-                <div style="font-size: 11px; font-weight: 600; color: #1a3a52; margin-bottom: 8px;">📎 Actuales:</div>
-                ${caseItem.archivos.map((arch, idx) => `
-                    <div style="font-size: 11px; color: #0ea5e9; margin-bottom: 6px; padding: 6px; background: white; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
-                        <span><i class="fas fa-file"></i> ${arch.substring(0, 16)}</span>
-                        <button onclick="downloadFile('${arch}')" style="background: #0ea5e9; color: white; border: none; padding: 2px 6px; border-radius: 3px; cursor: pointer; font-size: 10px;">↓</button>
-                    </div>
-                `).join('')}
-            </div>
-        `;
-    }
 
     openModal('newCaseModal');
 }
 
-function editStatus(caseId) {
+async function editStatus(caseId) {
     const caseItem = cases.find(c => c.id === caseId);
     if (!caseItem) return;
 
@@ -718,16 +714,18 @@ function editStatus(caseId) {
     const nextIndex = (currentIndex + 1) % estados.length;
     const newStatus = estados[nextIndex];
 
-    caseItem.estado = newStatus;
-    caseItem.updated_at = new Date().toISOString();
-    localStorage.setItem('sigolCases', JSON.stringify(cases));
-    loadFromLocalStorage();
-    alert(`✓ ${newStatus}`);
+    try {
+        const { error } = await supabase.from('oficios').update({ estado: newStatus, updated_at: new Date().toISOString() }).eq('id', caseId);
+        if (error) throw error;
+        await loadFromSupabase();
+        alert(`✓ ${newStatus}`);
+    } catch (err) {
+        alert('❌ Error: ' + err.message);
+    }
 }
 
-function saveContact() {
+async function saveContact() {
     const data = {
-        id: Date.now(),
         nombre: document.getElementById('contactName').value,
         email: document.getElementById('contactEmail').value,
         telefono: document.getElementById('contactPhone').value,
@@ -735,14 +733,18 @@ function saveContact() {
         created_at: new Date().toISOString()
     };
 
-    contacts.push(data);
-    localStorage.setItem('sigolContacts', JSON.stringify(contacts));
-    closeModal('newContactModal');
-    document.getElementById('contactName').value = '';
-    document.getElementById('contactEmail').value = '';
-    document.getElementById('contactPhone').value = '';
-    loadFromLocalStorage();
-    alert('✓ Guardado');
+    try {
+        const { error } = await supabase.from('contactos').insert([data]);
+        if (error) throw error;
+        closeModal('newContactModal');
+        document.getElementById('contactName').value = '';
+        document.getElementById('contactEmail').value = '';
+        document.getElementById('contactPhone').value = '';
+        await loadFromSupabase();
+        alert('✓ Guardado');
+    } catch (err) {
+        alert('❌ Error: ' + err.message);
+    }
 }
 
 function loadContacts() {
@@ -796,7 +798,7 @@ if (JSON.parse(localStorage.getItem('sigolUser'))) {
     document.getElementById('dashboardScreen').classList.add('active');
     document.getElementById('userFullName').textContent = u.firstName + ' ' + u.lastName;
     document.getElementById('userPosition').textContent = 'Legajo #' + u.legajo;
-    loadFromLocalStorage();
+    loadFromSupabase();
 }
 </script>
 
