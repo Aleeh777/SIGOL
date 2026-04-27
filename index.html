@@ -526,7 +526,6 @@ async function saveCase() {
         dependencia: document.getElementById('department').value,
         tecnico_principal: document.getElementById('mainTechnician').value,
         estado: document.getElementById('status').value,
-        archivos: uploadedFiles.map(f => f.name).join(','),
         usuario_creador: currentUser.firstName,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
@@ -536,7 +535,13 @@ async function saveCase() {
         if (editingCaseId) {
             await sbFetch(`oficios?id=eq.${editingCaseId}`, 'PATCH', data);
         } else {
-            await sbFetch('oficios', 'POST', data);
+            const result = await sbFetch('oficios', 'POST', data);
+            // Guardar archivos en localStorage con el ID del oficio
+            if (uploadedFiles.length > 0 && result && result.length > 0) {
+                const caseId = result[0].id;
+                const fileNames = uploadedFiles.map(f => f.name);
+                localStorage.setItem(`case_files_${caseId}`, JSON.stringify(fileNames));
+            }
         }
 
         closeModal('newCaseModal');
