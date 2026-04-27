@@ -4,85 +4,72 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#1a3a52">
-    <title>SIGOL - Sistema de Gestión de Oficios</title>
+    <title>SIGOL</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        html, body { height: 100%; width: 100%; overflow-x: hidden; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        html, body { height: 100%; width: 100%; overflow-x: hidden; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
         body { background: #f5f7fa; color: #333; }
 
-        /* LOGIN */
         #loginScreen { display: flex; align-items: center; justify-content: center; min-height: 100vh; background: linear-gradient(135deg, #0f172a 0%, #1a3a52 100%); padding: 20px; }
         #loginScreen.hidden { display: none !important; }
 
         .login-box { background: white; padding: 50px 30px; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); width: 100%; max-width: 420px; }
         .login-header { text-align: center; margin-bottom: 40px; }
-        .login-logo { font-size: 52px; font-weight: 900; color: #1a3a52; margin-bottom: 12px; letter-spacing: -2px; }
-        .login-subtitle { color: #9ca3af; font-size: 13px; text-transform: uppercase; letter-spacing: 2px; font-weight: 600; }
+        .login-logo { font-size: 52px; font-weight: 900; color: #1a3a52; margin-bottom: 12px; }
+        .login-subtitle { color: #9ca3af; font-size: 13px; text-transform: uppercase; letter-spacing: 2px; }
 
         .form-group { margin-bottom: 20px; }
-        .form-label { display: block; font-size: 12px; font-weight: 700; color: #1a3a52; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
-        input[type="text"], input[type="password"], input[type="email"], input[type="date"], select, textarea {
-            width: 100%; padding: 14px; border: 1.5px solid #e5e7eb; border-radius: 10px; font-size: 15px; font-family: inherit; transition: all 0.2s;
-        }
-        input:focus, select:focus, textarea:focus { outline: none; border-color: #0ea5e9; box-shadow: 0 0 0 3px rgba(14,165,233,0.1); }
+        .form-label { display: block; font-size: 12px; font-weight: 700; color: #1a3a52; margin-bottom: 8px; text-transform: uppercase; }
+        input { width: 100%; padding: 14px; border: 1.5px solid #e5e7eb; border-radius: 10px; font-size: 15px; }
+        input:focus { outline: none; border-color: #0ea5e9; box-shadow: 0 0 0 3px rgba(14,165,233,0.1); }
 
-        .login-button { width: 100%; padding: 14px; background: linear-gradient(135deg, #1a3a52 0%, #2a4f6f 100%); color: white; border: none; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; transition: all 0.3s; margin-top: 10px; }
-        .login-button:active { transform: scale(0.98); }
+        .login-button { width: 100%; padding: 14px; background: linear-gradient(135deg, #1a3a52 0%, #2a4f6f 100%); color: white; border: none; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; text-transform: uppercase; margin-top: 10px; }
 
-        .error-msg { background: #fee; color: #c33; padding: 12px; border-radius: 8px; margin-bottom: 15px; display: none; border-left: 4px solid #f33; font-size: 13px; }
+        .error-msg { background: #fee; color: #c33; padding: 12px; border-radius: 8px; margin-bottom: 15px; display: none; border-left: 4px solid #f33; }
         .error-msg.show { display: block; }
 
-        /* DASHBOARD */
         #dashboardScreen { display: none; height: 100vh; flex-direction: column; background: #f5f7fa; }
         #dashboardScreen.active { display: flex; }
 
         .dashboard-header { background: linear-gradient(135deg, #1a3a52 0%, #2a4f6f 100%); color: white; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
-        .header-title { font-size: 18px; font-weight: 800; letter-spacing: -0.5px; }
-        .header-user { display: flex; align-items: center; gap: 8px; }
+        .header-title { font-size: 18px; font-weight: 800; }
+        .sync-indicator { display: inline-block; width: 8px; height: 8px; background: #10b981; border-radius: 50%; margin-left: 6px; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
         .user-info { text-align: right; font-size: 10px; }
-        .user-name { font-weight: 700; font-size: 11px; }
-        .logout-button { background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: 600; text-transform: uppercase; }
+        .logout-button { background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 10px; }
 
         .dashboard-content { display: flex; flex: 1; overflow: hidden; flex-direction: column-reverse; }
 
-        /* SIDEBAR MOBILE TABS */
         .sidebar { width: 100%; background: white; border-top: 1px solid #e5e7eb; padding: 0; display: flex; flex-shrink: 0; order: 2; }
-        .sidebar-item { flex: 1; padding: 12px; border: none; background: white; cursor: pointer; font-size: 11px; color: #6b7280; display: flex; flex-direction: column; align-items: center; gap: 4px; border-top: 3px solid transparent; text-align: center; transition: all 0.2s; }
-        .sidebar-item i { font-size: 18px; }
-        .sidebar-item:hover { background: #f9fafb; }
-        .sidebar-item.active { color: #0ea5e9; border-top-color: #0ea5e9; background: rgba(14,165,233,0.05); font-weight: 600; }
+        .sidebar-item { flex: 1; padding: 12px; cursor: pointer; font-size: 11px; color: #6b7280; display: flex; flex-direction: column; align-items: center; gap: 4px; border-top: 3px solid transparent; }
+        .sidebar-item.active { color: #0ea5e9; border-top-color: #0ea5e9; background: rgba(14,165,233,0.05); }
 
         .main-area { flex: 1; overflow-y: auto; padding: 14px; width: 100%; order: 1; -webkit-overflow-scrolling: touch; }
         .section { display: none; }
         .section.active { display: block; }
 
-        /* STATS */
         .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 14px; }
         .stat-card { background: white; padding: 14px; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); border-top: 3px solid #0ea5e9; }
         .stat-label { font-size: 10px; color: #6b7280; font-weight: 600; text-transform: uppercase; margin-bottom: 6px; }
         .stat-number { font-size: 26px; font-weight: 800; color: #1a3a52; }
 
-        /* SEARCH */
         .search-section { background: white; padding: 12px; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); margin-bottom: 14px; }
         .search-title { font-size: 12px; font-weight: 700; color: #1a3a52; margin-bottom: 10px; }
         .search-bar { width: 100%; padding: 10px; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 13px; margin-bottom: 8px; }
-        .search-bar:focus { outline: none; border-color: #0ea5e9; box-shadow: 0 0 0 2px rgba(14,165,233,0.1); }
-        .filter-row { display: grid; grid-template-columns: 1fr; gap: 10px; }
-        select { padding: 10px; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 13px; background: white; width: 100%; }
-
+        select { width: 100%; padding: 10px; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 13px; background: white; }
+        
         .action-buttons { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
-        .btn { padding: 10px 14px; border: none; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; text-transform: uppercase; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s; }
+        .btn { padding: 10px 14px; border: none; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; text-transform: uppercase; display: inline-flex; align-items: center; gap: 6px; }
         .btn-primary { background: linear-gradient(135deg, #1a3a52 0%, #2a4f6f 100%); color: white; }
         .btn-secondary { background: #e5e7eb; color: #374151; }
 
-        /* TABLE */
         .cases-table { background: white; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); overflow: hidden; }
         table { width: 100%; border-collapse: collapse; font-size: 11px; }
         thead { background: linear-gradient(90deg, #f3f4f6 0%, #e5e7eb 100%); border-bottom: 2px solid #0ea5e9; }
-        th { padding: 10px; text-align: left; font-weight: 700; color: #1a3a52; text-transform: uppercase; font-size: 10px; }
+        th { padding: 10px; text-align: left; font-weight: 700; color: #1a3a52; text-transform: uppercase; }
         td { padding: 10px; border-bottom: 1px solid #e5e7eb; }
 
         .status-badge { display: inline-block; padding: 4px 8px; border-radius: 12px; font-size: 10px; font-weight: 600; }
@@ -90,51 +77,30 @@
         .status-progress { background: rgba(59,130,246,0.1); color: #1e40af; }
         .status-finished { background: rgba(16,185,129,0.1); color: #065f46; }
 
-        /* MODALS */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; align-items: center; justify-content: flex-end; }
         .modal.active { display: flex; }
-        .modal-content { background: white; border-radius: 20px 20px 0 0; max-height: 85vh; overflow-y: auto; box-shadow: 0 -4px 20px rgba(0,0,0,0.3); width: 100%; display: flex; flex-direction: column; -webkit-overflow-scrolling: touch; }
-        .modal-header { padding: 16px; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; background: white; position: sticky; top: 0; }
+        .modal-content { background: white; border-radius: 20px 20px 0 0; max-height: 85vh; overflow-y: auto; width: 100%; display: flex; flex-direction: column; }
+        .modal-header { padding: 16px; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; background: white; }
         .modal-title { font-size: 16px; font-weight: 700; color: #1a3a52; }
         .modal-close { background: none; border: none; font-size: 28px; color: #6b7280; cursor: pointer; }
-        .modal-body { padding: 16px; flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
-        .modal-footer { padding: 16px; border-top: 1px solid #e5e7eb; display: flex; gap: 10px; justify-content: flex-end; background: white; position: sticky; bottom: 0; }
+        .modal-body { padding: 16px; flex: 1; overflow-y: auto; }
+        .modal-footer { padding: 16px; border-top: 1px solid #e5e7eb; display: flex; gap: 10px; justify-content: flex-end; position: sticky; bottom: 0; background: white; }
 
         .form-section { margin-bottom: 18px; }
         .form-section-title { font-size: 12px; font-weight: 700; color: #1a3a52; text-transform: uppercase; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid #0ea5e9; }
         .form-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
 
-        .file-upload-area { border: 2px dashed #0ea5e9; border-radius: 10px; padding: 16px; text-align: center; cursor: pointer; transition: all 0.2s; }
-        .file-upload-area:hover { background: #f0fdf4; }
-        .file-list { margin-top: 12px; }
-        .file-item { background: #f0fdf4; padding: 10px; border-radius: 8px; border-left: 4px solid #10b981; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 12px; }
-
         .case-detail { background: white; padding: 12px; border-radius: 10px; margin-bottom: 10px; border-left: 4px solid #0ea5e9; }
         .case-detail-header { border-bottom: 2px solid #e5e7eb; padding-bottom: 8px; margin-bottom: 10px; }
         .case-detail-title { font-size: 13px; font-weight: 700; color: #1a3a52; }
-        .case-detail-info { display: grid; grid-template-columns: 1fr; gap: 8px; margin-top: 8px; }
-        .info-block { display: flex; flex-direction: column; }
-        .info-label { font-size: 10px; color: #6b7280; font-weight: 600; text-transform: uppercase; margin-bottom: 2px; }
-        .info-value { font-size: 12px; color: #1a3a52; }
 
-        .contacts-grid { display: grid; grid-template-columns: 1fr; gap: 10px; margin-bottom: 16px; }
-        .contact-card { background: white; padding: 12px; border-radius: 10px; border-left: 4px solid #0ea5e9; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
-        .contact-title { font-size: 13px; font-weight: 700; color: #1a3a52; margin-bottom: 8px; }
-        .contact-email { background: #f9fafb; padding: 8px; border-radius: 6px; margin-bottom: 10px; }
-        .contact-email-label { font-size: 10px; color: #6b7280; font-weight: 600; margin-bottom: 3px; }
-        .contact-email-value { font-size: 11px; color: #0ea5e9; word-break: break-all; }
-        .contact-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        .contact-btn { padding: 8px; font-size: 10px; font-weight: 600; border: none; border-radius: 6px; cursor: pointer; text-transform: uppercase; display: flex; align-items: center; justify-content: center; gap: 4px; }
+        .contacts-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+        .contact-card { background: white; padding: 12px; border-radius: 10px; border-left: 4px solid #0ea5e9; }
 
-        /* RESPONSIVE */
         @media (min-width: 768px) {
-            .sidebar { width: 260px; border-top: none; border-right: 1px solid #e5e7eb; padding: 20px; overflow-y: auto; flex-direction: column; order: 0; }
-            .sidebar-item { padding: 14px; border-top: none; border-left: 3px solid transparent; }
-            .sidebar-item.active { border-left-color: #0ea5e9; border-top: none; }
+            .sidebar { width: 260px; border-top: none; border-right: 1px solid #e5e7eb; flex-direction: column; order: 0; }
             .main-area { padding: 30px; order: 1; }
-            .stats-grid { grid-template-columns: repeat(4, 1fr); gap: 16px; }
-            .form-grid { grid-template-columns: repeat(2, 1fr); }
-            .contacts-grid { grid-template-columns: repeat(2, 1fr); }
+            .stats-grid { grid-template-columns: repeat(4, 1fr); }
             .modal-content { border-radius: 12px; max-width: 800px; width: 90%; }
             .modal { justify-content: center; }
         }
@@ -142,7 +108,6 @@
 </head>
 <body>
 
-<!-- LOGIN -->
 <div id="loginScreen">
     <div class="login-box">
         <div class="login-header">
@@ -170,13 +135,12 @@
     </div>
 </div>
 
-<!-- DASHBOARD -->
 <div id="dashboardScreen">
     <div class="dashboard-header">
-        <div class="header-title">SIGOL</div>
-        <div class="header-user">
+        <div class="header-title">SIGOL <span class="sync-indicator"></span></div>
+        <div style="display: flex; align-items: center; gap: 8px;">
             <div class="user-info">
-                <div class="user-name" id="userFullName">Usuario</div>
+                <div style="font-weight: 700; font-size: 11px;" id="userFullName">Usuario</div>
                 <div id="userPosition">Legajo</div>
             </div>
             <button class="logout-button" onclick="doLogout()">Cerrar</button>
@@ -204,38 +168,23 @@
         </div>
 
         <div class="main-area">
-            <!-- DASHBOARD SECTION -->
             <div id="section-dashboard" class="section active">
                 <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-label">Total</div>
-                        <div class="stat-number" id="totalCases">0</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">Pendientes</div>
-                        <div class="stat-number" id="countPending">0</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">En Trámite</div>
-                        <div class="stat-number" id="countProgress">0</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">Finalizados</div>
-                        <div class="stat-number" id="countFinished">0</div>
-                    </div>
+                    <div class="stat-card"><div class="stat-label">Total</div><div class="stat-number" id="totalCases">0</div></div>
+                    <div class="stat-card"><div class="stat-label">Pendientes</div><div class="stat-number" id="countPending">0</div></div>
+                    <div class="stat-card"><div class="stat-label">En Trámite</div><div class="stat-number" id="countProgress">0</div></div>
+                    <div class="stat-card"><div class="stat-label">Finalizados</div><div class="stat-number" id="countFinished">0</div></div>
                 </div>
 
                 <div class="search-section">
                     <div class="search-title">🔍 Buscar Legajo</div>
                     <input type="text" class="search-bar" id="mainSearch" placeholder="Número de legajo..." onkeyup="filterCases()">
-                    <div class="filter-row">
-                        <select id="filterStatus" onchange="filterCases()">
-                            <option value="">Todos los Estados</option>
-                            <option value="Pendiente">Pendiente</option>
-                            <option value="En Trámite">En Trámite</option>
-                            <option value="Finalizado">Finalizado</option>
-                        </select>
-                    </div>
+                    <select id="filterStatus" onchange="filterCases()">
+                        <option value="">Todos los Estados</option>
+                        <option value="Pendiente">Pendiente</option>
+                        <option value="En Trámite">En Trámite</option>
+                        <option value="Finalizado">Finalizado</option>
+                    </select>
                 </div>
 
                 <div class="action-buttons">
@@ -244,85 +193,47 @@
 
                 <div class="cases-table">
                     <table>
-                        <thead>
-                            <tr>
-                                <th>Legajo</th>
-                                <th>Técnico</th>
-                                <th>Estado</th>
-                                <th>Acc.</th>
-                            </tr>
-                        </thead>
-                        <tbody id="casesTable">
-                            <tr><td colspan="4" style="text-align:center;padding:12px;">Sin oficios</td></tr>
-                        </tbody>
+                        <thead><tr><th>Legajo</th><th>Técnico</th><th>Estado</th><th>Acc.</th></tr></thead>
+                        <tbody id="casesTable"><tr><td colspan="4" style="text-align:center;padding:20px;">Cargando...</td></tr></tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- NEW CASE SECTION -->
             <div id="section-new-case" class="section">
                 <h2 style="color:#1a3a52;margin-bottom:16px;font-size:15px;">Nuevo Oficio</h2>
                 <button class="btn btn-primary" onclick="openModal('newCaseModal')" style="width:100%;"><i class="fas fa-plus"></i> Crear</button>
             </div>
 
-            <!-- CASES LIST -->
             <div id="section-cases" class="section">
                 <h2 style="color:#1a3a52;margin-bottom:14px;font-size:15px;">📋 Oficios</h2>
                 <div id="casesList"></div>
             </div>
 
-            <!-- CONTACTS -->
             <div id="section-contacts" class="section">
                 <h2 style="color:#1a3a52;margin-bottom:14px;font-size:15px;">📧 Contactos</h2>
                 <div class="contacts-grid">
                     <div class="contact-card">
-                        <div class="contact-title">🔐 Delitos Telemáticos</div>
-                        <div class="contact-email">
-                            <div class="contact-email-label">Email:</div>
-                            <div class="contact-email-value">
-                                <a href="mailto:divdtelematicos@outlook.com" style="color: #0ea5e9; text-decoration: none;">divdtelematicos@outlook.com</a>
-                            </div>
-                        </div>
-                        <div class="contact-buttons">
-                            <button class="contact-btn" style="background: #1a3a52; color: white;" onclick="window.open('https://outlook.live.com', '_blank')">
-                                <i class="fas fa-envelope"></i> Email
-                            </button>
-                            <button class="contact-btn" style="background: #0ea5e9; color: white;" onclick="window.open('https://drive.google.com', '_blank')">
-                                <i class="fas fa-cloud"></i> Drive
-                            </button>
+                        <div style="font-size: 13px; font-weight: 700; color: #1a3a52; margin-bottom: 8px;">🔐 Delitos Telemáticos</div>
+                        <div style="font-size: 12px; color: #0ea5e9; margin-bottom: 10px;"><a href="mailto:divdtelematicos@outlook.com" style="color: #0ea5e9; text-decoration: none;">divdtelematicos@outlook.com</a></div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                            <button class="btn btn-primary" style="padding:8px;font-size:10px;" onclick="window.open('https://outlook.live.com','_blank')"><i class="fas fa-envelope"></i></button>
+                            <button class="btn btn-primary" style="padding:8px;font-size:10px;" onclick="window.open('https://drive.google.com','_blank')"><i class="fas fa-cloud"></i></button>
                         </div>
                     </div>
-
                     <div class="contact-card" style="border-left-color: #f59e0b;">
-                        <div class="contact-title">📸 Laboratorio Fotográfico</div>
-                        <div class="contact-email">
-                            <div class="contact-email-label">Email:</div>
-                            <div class="contact-email-value">
-                                <a href="mailto:laboratorio@outlook.com" style="color: #f59e0b; text-decoration: none;">laboratorio@outlook.com</a>
-                            </div>
-                        </div>
-                        <div class="contact-buttons">
-                            <button class="contact-btn" style="background: #1a3a52; color: white;" onclick="window.open('https://outlook.live.com', '_blank')">
-                                <i class="fas fa-envelope"></i> Email
-                            </button>
-                            <button class="contact-btn" style="background: #f59e0b; color: white;" onclick="window.open('https://drive.google.com', '_blank')">
-                                <i class="fas fa-cloud"></i> Drive
-                            </button>
+                        <div style="font-size: 13px; font-weight: 700; color: #1a3a52; margin-bottom: 8px;">📸 Laboratorio Fotográfico</div>
+                        <div style="font-size: 12px; color: #f59e0b; margin-bottom: 10px;"><a href="mailto:laboratorio@outlook.com" style="color: #f59e0b; text-decoration: none;">laboratorio@outlook.com</a></div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                            <button class="btn btn-primary" style="padding:8px;font-size:10px;" onclick="window.open('https://outlook.live.com','_blank')"><i class="fas fa-envelope"></i></button>
+                            <button class="btn btn-primary" style="padding:8px;font-size:10px;" onclick="window.open('https://drive.google.com','_blank')"><i class="fas fa-cloud"></i></button>
                         </div>
                     </div>
                 </div>
-
-                <h3 style="color:#1a3a52;margin-top:14px;margin-bottom:12px;font-size:13px;">📋 Adicionales</h3>
-                <div class="action-buttons">
-                    <button class="btn btn-primary" style="width:100%;" onclick="openModal('newContactModal')"><i class="fas fa-plus"></i> Agregar</button>
-                </div>
-                <div id="contactsList"></div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- NEW CASE MODAL -->
 <div class="modal" id="newCaseModal">
     <div class="modal-content">
         <div class="modal-header">
@@ -350,19 +261,9 @@
                 <div class="form-section-title">Asignación</div>
                 <div class="form-grid">
                     <div class="form-group"><label class="form-label">División</label><select id="department"><option value="TELEMATICO">Delitos Telemáticos</option><option value="LABORATORIO">Laboratorio Fotográfico</option></select></div>
-                    <div class="form-group"><label class="form-label">Técnico</label><input type="text" id="mainTechnician" placeholder="Nombre"></div>
+                    <div class="form-group"><label class="form-label">Técnico</label><input type="text" id="mainTechnician"></div>
                     <div class="form-group"><label class="form-label">Estado</label><select id="status"><option value="Pendiente">Pendiente</option><option value="En Trámite">En Trámite</option><option value="Finalizado">Finalizado</option></select></div>
                 </div>
-            </div>
-            <div class="form-section">
-                <div class="form-section-title">Archivos</div>
-                <div class="file-upload-area" id="fileUploadArea">
-                    <i class="fas fa-cloud-upload-alt" style="font-size: 28px; color: #0ea5e9; margin-bottom: 8px; display: block;"></i>
-                    <div style="font-weight: 600; color: #1a3a52; margin-bottom: 4px; font-size: 13px;">Arrastra o toca</div>
-                    <div style="font-size: 11px; color: #6b7280;">PDF o Word</div>
-                    <input type="file" id="fileInput" accept=".pdf,.doc,.docx" style="display: none;">
-                </div>
-                <div class="file-list" id="fileList"></div>
             </div>
         </div>
         <div class="modal-footer">
@@ -372,93 +273,34 @@
     </div>
 </div>
 
-<!-- CONTACT MODAL -->
-<div class="modal" id="newContactModal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <div class="modal-title">Agregar Contacto</div>
-            <button class="modal-close" onclick="closeModal('newContactModal')">&times;</button>
-        </div>
-        <div class="modal-body">
-            <div class="form-section">
-                <div class="form-grid">
-                    <div class="form-group"><label class="form-label">Nombre</label><input type="text" id="contactName"></div>
-                    <div class="form-group"><label class="form-label">Email</label><input type="email" id="contactEmail"></div>
-                    <div class="form-group"><label class="form-label">Teléfono</label><input type="text" id="contactPhone"></div>
-                    <div class="form-group"><label class="form-label">División</label><select id="contactDivision"><option value="TELEMATICO">Delitos Telemáticos</option><option value="LABORATORIO">Laboratorio Fotográfico</option></select></div>
-                </div>
-            </div>
-        </div>
-        <div class="modal-footer">
-            <button class="btn btn-secondary" onclick="closeModal('newContactModal')">Cancelar</button>
-            <button class="btn btn-primary" onclick="saveContact()">Guardar</button>
-        </div>
-    </div>
-</div>
-
 <script>
+const SUPABASE_URL = 'https://gmbhptqijgrlxosfskva.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdtYmhwdHFpamdybHhvc2Zza3ZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwNjIyNTAsImV4cCI6MjA5MjYzODI1MH0.FQRwIjvLeXUaNM_Vx2R2KLuYJyWgNrjmuP85QTdRBLY';
 const PASSWORD = '3813';
+
 let currentUser = null;
 let cases = [];
-let contacts = [];
-let uploadedFiles = [];
 let editingCaseId = null;
 
-// FILE UPLOAD
-document.addEventListener('DOMContentLoaded', function() {
-    const fileUploadArea = document.getElementById('fileUploadArea');
-    const fileInput = document.getElementById('fileInput');
-
-    if (fileUploadArea && fileInput) {
-        fileUploadArea.addEventListener('click', () => fileInput.click());
-        
-        fileInput.addEventListener('change', (e) => {
-            if (e.target.files) {
-                uploadedFiles = Array.from(e.target.files);
-                renderFileList();
-            }
-        });
-
-        fileUploadArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            fileUploadArea.style.background = '#f0fdf4';
-        });
-
-        fileUploadArea.addEventListener('dragleave', () => {
-            fileUploadArea.style.background = 'transparent';
-        });
-
-        fileUploadArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            fileUploadArea.style.background = 'transparent';
-            uploadedFiles = Array.from(e.dataTransfer.files);
-            renderFileList();
-        });
+async function sbFetch(endpoint, method = 'GET', body = null) {
+    const url = `${SUPABASE_URL}/rest/v1/${endpoint}`;
+    const opts = {
+        method,
+        headers: {
+            'Content-Type': 'application/json',
+            'apikey': SUPABASE_KEY,
+            'Authorization': `Bearer ${SUPABASE_KEY}`
+        }
+    };
+    if (body) opts.body = JSON.stringify(body);
+    
+    const res = await fetch(url, opts);
+    if (!res.ok) {
+        const err = await res.json();
+        console.error('Error:', err);
+        throw new Error(err.message || 'Error en solicitud');
     }
-});
-
-function renderFileList() {
-    const fileList = document.getElementById('fileList');
-    fileList.innerHTML = '';
-    if (uploadedFiles.length > 0) {
-        fileList.innerHTML = '<div style="font-size: 11px; color: #6b7280; margin-bottom: 8px; font-weight: 600;">📁 Archivos:</div>';
-    }
-    uploadedFiles.forEach((file, index) => {
-        fileList.innerHTML += `
-            <div class="file-item">
-                <div style="flex: 1;">
-                    <i class="fas fa-file-pdf" style="color: #ef4444; margin-right: 6px;"></i> 
-                    ${file.name}
-                </div>
-                <button onclick="removeFile(${index})" style="background: #ef4444; color: white; border: none; padding: 3px 6px; border-radius: 3px; cursor: pointer; font-size: 12px;">✕</button>
-            </div>
-        `;
-    });
-}
-
-function removeFile(index) {
-    uploadedFiles.splice(index, 1);
-    renderFileList();
+    return await res.json();
 }
 
 function doLogin() {
@@ -495,7 +337,7 @@ function doLogin() {
     document.getElementById('userFullName').textContent = firstName + ' ' + lastName;
     document.getElementById('userPosition').textContent = 'Legajo #' + legajo;
 
-    loadData();
+    loadFromSupabase();
 }
 
 function doLogout() {
@@ -507,16 +349,17 @@ function doLogout() {
     }
 }
 
-function loadData() {
-    const stored = localStorage.getItem('sigolCases');
-    if (stored) cases = JSON.parse(stored);
-    const contactsStored = localStorage.getItem('sigolContacts');
-    if (contactsStored) contacts = JSON.parse(contactsStored);
-    
-    updateStats();
-    renderTable();
-    renderCasesList();
-    loadContacts();
+async function loadFromSupabase() {
+    try {
+        const data = await sbFetch('oficios?order=id.desc');
+        cases = Array.isArray(data) ? data : [];
+        updateStats();
+        renderTable();
+        renderCasesList();
+    } catch (err) {
+        console.error('Error al cargar:', err);
+        document.getElementById('casesTable').innerHTML = `<tr><td colspan="4" style="text-align:center;padding:20px;color:#c33;">❌ Error: ${err.message}</td></tr>`;
+    }
 }
 
 function updateStats() {
@@ -534,7 +377,7 @@ function renderTable() {
     const search = (document.getElementById('mainSearch')?.value || '').toLowerCase();
     const statusFilter = document.getElementById('filterStatus')?.value || '';
     const filtered = cases.filter(c => {
-        const m = !search || c.numero_legajo.toLowerCase().includes(search);
+        const m = !search || c.numero_legajo?.toLowerCase().includes(search);
         const s = !statusFilter || c.estado === statusFilter;
         return m && s;
     });
@@ -547,11 +390,11 @@ function renderTable() {
     }
 
     filtered.forEach(c => {
-        const st = 'status-' + c.estado.replace(/\s/g, '-').toLowerCase();
+        const st = 'status-' + (c.estado || 'Pendiente').replace(/\s/g, '-').toLowerCase();
         tbody.innerHTML += `<tr>
-            <td><strong>${c.numero_legajo.substring(0,10)}</strong></td>
+            <td><strong>${(c.numero_legajo || '').substring(0,10)}</strong></td>
             <td>${(c.tecnico_principal || '-').substring(0,10)}</td>
-            <td><span class="status-badge ${st}">${c.estado.substring(0,3)}</span></td>
+            <td><span class="status-badge ${st}">${(c.estado || 'Pendiente').substring(0,3)}</span></td>
             <td style="text-align:center;">
                 <button onclick="editCase(${c.id})" style="background:#0ea5e9;color:white;border:none;padding:4px 6px;border-radius:3px;cursor:pointer;font-size:10px;">✎</button>
                 <button onclick="editStatus(${c.id})" style="background:#10b981;color:white;border:none;padding:4px 6px;border-radius:3px;cursor:pointer;font-size:10px;margin-left:2px;">⟳</button>
@@ -569,38 +412,21 @@ function renderCasesList() {
 
     let html = '';
     cases.forEach(c => {
-        const st = 'status-' + c.estado.replace(/\s/g, '-').toLowerCase();
+        const st = 'status-' + (c.estado || 'Pendiente').replace(/\s/g, '-').toLowerCase();
         html += `
             <div class="case-detail">
                 <div class="case-detail-header">
                     <div class="case-detail-title">${c.numero_legajo}</div>
                     <div style="font-size: 11px; color: #6b7280; margin-top: 4px;">${c.causa}</div>
                 </div>
-                <div class="case-detail-info">
-                    <div class="info-block">
-                        <div class="info-label">Fiscalía</div>
-                        <div class="info-value">${c.fiscalia}</div>
-                    </div>
-                    <div class="info-block">
-                        <div class="info-label">División</div>
-                        <div class="info-value">${c.dependencia}</div>
-                    </div>
-                    <div class="info-block">
-                        <div class="info-label">Técnico</div>
-                        <div class="info-value">${c.tecnico_principal || '-'}</div>
-                    </div>
-                    <div class="info-block">
-                        <div class="info-label">Estado</div>
-                        <div><span class="status-badge ${st}">${c.estado}</span></div>
-                    </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 10px 0;">
+                    <div><div style="font-size: 10px; color: #6b7280; font-weight: 600;">Fiscalía</div><div style="font-size: 12px; color: #1a3a52;">${c.fiscalia}</div></div>
+                    <div><div style="font-size: 10px; color: #6b7280; font-weight: 600;">Técnico</div><div style="font-size: 12px; color: #1a3a52;">${c.tecnico_principal || '-'}</div></div>
                 </div>
+                <div style="margin-top: 10px;"><span class="status-badge ${st}">${c.estado || 'Pendiente'}</span></div>
                 <div style="margin-top: 10px; display: flex; gap: 6px;">
-                    <button class="btn btn-primary" style="flex:1;padding:8px;font-size:11px;" onclick="editCase(${c.id})">
-                        <i class="fas fa-edit"></i> Editar
-                    </button>
-                    <button class="btn" style="flex:1;padding:8px;font-size:11px;background:#10b981;color:white;" onclick="editStatus(${c.id})">
-                        <i class="fas fa-check"></i> Estado
-                    </button>
+                    <button class="btn btn-primary" style="flex:1;padding:8px;font-size:11px;" onclick="editCase(${c.id})">✎ Editar</button>
+                    <button class="btn" style="flex:1;padding:8px;font-size:11px;background:#10b981;color:white;" onclick="editStatus(${c.id})">⟳ Estado</button>
                 </div>
             </div>
         `;
@@ -608,9 +434,8 @@ function renderCasesList() {
     casesList.innerHTML = html;
 }
 
-function saveCase() {
+async function saveCase() {
     const data = {
-        id: editingCaseId || Date.now(),
         numero_legajo: document.getElementById('caseNumber').value,
         causa: document.getElementById('caseName').value,
         fiscalia: document.getElementById('prosecutor').value,
@@ -620,24 +445,25 @@ function saveCase() {
         dependencia: document.getElementById('department').value,
         tecnico_principal: document.getElementById('mainTechnician').value,
         estado: document.getElementById('status').value,
-        archivos: uploadedFiles.map(f => f.name),
         usuario_creador: currentUser.firstName,
-        created_at: editingCaseId ? cases.find(c => c.id === editingCaseId).created_at : new Date().toISOString(),
+        created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
     };
 
-    if (editingCaseId) {
-        const index = cases.findIndex(c => c.id === editingCaseId);
-        if (index !== -1) cases[index] = data;
-    } else {
-        cases.push(data);
-    }
+    try {
+        if (editingCaseId) {
+            await sbFetch(`oficios?id=eq.${editingCaseId}`, 'PATCH', data);
+        } else {
+            await sbFetch('oficios', 'POST', data);
+        }
 
-    localStorage.setItem('sigolCases', JSON.stringify(cases));
-    closeModal('newCaseModal');
-    resetForm();
-    loadData();
-    alert('✓ Guardado');
+        closeModal('newCaseModal');
+        resetForm();
+        await loadFromSupabase();
+        alert('✓ Guardado en la nube');
+    } catch (err) {
+        alert('❌ Error: ' + err.message);
+    }
 }
 
 function editCase(caseId) {
@@ -647,69 +473,35 @@ function editCase(caseId) {
     editingCaseId = caseId;
     document.getElementById('modalTitle').textContent = 'Editar Oficio';
     
-    document.getElementById('caseNumber').value = caseItem.numero_legajo;
-    document.getElementById('caseName').value = caseItem.causa;
-    document.getElementById('prosecutor').value = caseItem.fiscalia;
-    document.getElementById('receiveDate').value = caseItem.fecha_recepcion;
-    document.getElementById('victim').value = caseItem.victima;
-    document.getElementById('suspect').value = caseItem.causante;
-    document.getElementById('department').value = caseItem.dependencia;
-    document.getElementById('mainTechnician').value = caseItem.tecnico_principal;
-    document.getElementById('status').value = caseItem.estado;
-
-    uploadedFiles = [];
-    document.getElementById('fileList').innerHTML = '';
+    document.getElementById('caseNumber').value = caseItem.numero_legajo || '';
+    document.getElementById('caseName').value = caseItem.causa || '';
+    document.getElementById('prosecutor').value = caseItem.fiscalia || '';
+    document.getElementById('receiveDate').value = caseItem.fecha_recepcion || '';
+    document.getElementById('victim').value = caseItem.victima || '';
+    document.getElementById('suspect').value = caseItem.causante || '';
+    document.getElementById('department').value = caseItem.dependencia || 'TELEMATICO';
+    document.getElementById('mainTechnician').value = caseItem.tecnico_principal || '';
+    document.getElementById('status').value = caseItem.estado || 'Pendiente';
 
     openModal('newCaseModal');
 }
 
-function editStatus(caseId) {
+async function editStatus(caseId) {
     const caseItem = cases.find(c => c.id === caseId);
     if (!caseItem) return;
 
     const estados = ['Pendiente', 'En Trámite', 'Finalizado'];
-    const currentIndex = estados.indexOf(caseItem.estado);
+    const currentIndex = estados.indexOf(caseItem.estado || 'Pendiente');
     const nextIndex = (currentIndex + 1) % estados.length;
     const newStatus = estados[nextIndex];
 
-    caseItem.estado = newStatus;
-    caseItem.updated_at = new Date().toISOString();
-    localStorage.setItem('sigolCases', JSON.stringify(cases));
-    loadData();
-    alert(`✓ ${newStatus}`);
-}
-
-function saveContact() {
-    const data = {
-        id: Date.now(),
-        nombre: document.getElementById('contactName').value,
-        email: document.getElementById('contactEmail').value,
-        telefono: document.getElementById('contactPhone').value,
-        division: document.getElementById('contactDivision').value,
-        created_at: new Date().toISOString()
-    };
-
-    contacts.push(data);
-    localStorage.setItem('sigolContacts', JSON.stringify(contacts));
-    closeModal('newContactModal');
-    document.getElementById('contactName').value = '';
-    document.getElementById('contactEmail').value = '';
-    document.getElementById('contactPhone').value = '';
-    loadData();
-    alert('✓ Guardado');
-}
-
-function loadContacts() {
-    const list = document.getElementById('contactsList');
-    if (contacts.length === 0) {
-        list.innerHTML = '<p style="text-align:center;color:#999;padding:12px;font-size:12px;">Sin contactos</p>';
-        return;
+    try {
+        await sbFetch(`oficios?id=eq.${caseId}`, 'PATCH', { estado: newStatus, updated_at: new Date().toISOString() });
+        await loadFromSupabase();
+        alert(`✓ ${newStatus}`);
+    } catch (err) {
+        alert('❌ Error: ' + err.message);
     }
-    let html = '';
-    contacts.forEach(c => {
-        html += `<div style="background:#f9fafb;padding:10px;margin-bottom:8px;border-radius:6px;border-left:4px solid #0ea5e9;font-size:12px;"><strong>${c.nombre}</strong><br>📧 <a href="mailto:${c.email}" style="color:#0ea5e9;">${c.email}</a><br>📱 ${c.telefono || '-'}</div>`;
-    });
-    list.innerHTML = html;
 }
 
 function resetForm() {
@@ -723,9 +515,6 @@ function resetForm() {
     document.getElementById('suspect').value = '';
     document.getElementById('mainTechnician').value = '';
     document.getElementById('status').value = 'Pendiente';
-    uploadedFiles = [];
-    document.getElementById('fileInput').value = '';
-    document.getElementById('fileList').innerHTML = '';
 }
 
 function openModal(id) { document.getElementById(id).classList.add('active'); }
@@ -750,7 +539,7 @@ if (JSON.parse(localStorage.getItem('sigolUser'))) {
     document.getElementById('dashboardScreen').classList.add('active');
     document.getElementById('userFullName').textContent = u.firstName + ' ' + u.lastName;
     document.getElementById('userPosition').textContent = 'Legajo #' + u.legajo;
-    loadData();
+    loadFromSupabase();
 }
 </script>
 
