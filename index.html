@@ -22,7 +22,7 @@
 
         .form-group { margin-bottom: 20px; }
         .form-label { display: block; font-size: 12px; font-weight: 700; color: #1a3a52; margin-bottom: 8px; text-transform: uppercase; }
-        input { width: 100%; padding: 14px; border: 1.5px solid #e5e7eb; border-radius: 10px; font-size: 15px; }
+        input[type="text"], input[type="password"], input[type="date"] { width: 100%; padding: 14px; border: 1.5px solid #e5e7eb; border-radius: 10px; font-size: 15px; }
         input:focus { outline: none; border-color: #0ea5e9; box-shadow: 0 0 0 3px rgba(14,165,233,0.1); }
 
         .login-button { width: 100%; padding: 14px; background: linear-gradient(135deg, #1a3a52 0%, #2a4f6f 100%); color: white; border: none; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; text-transform: uppercase; margin-top: 10px; }
@@ -90,6 +90,16 @@
         .form-section-title { font-size: 12px; font-weight: 700; color: #1a3a52; text-transform: uppercase; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid #0ea5e9; }
         .form-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
 
+        .file-upload-area { border: 2px dashed #0ea5e9; border-radius: 10px; padding: 16px; text-align: center; cursor: pointer; transition: all 0.2s; background: #f0f9ff; }
+        .file-upload-area:hover { background: #e0f2fe; }
+        .file-upload-area i { font-size: 28px; color: #0ea5e9; margin-bottom: 8px; display: block; }
+        .file-upload-text { font-weight: 600; color: #1a3a52; margin-bottom: 4px; font-size: 13px; }
+        .file-upload-sub { font-size: 11px; color: #6b7280; }
+
+        .file-list { margin-top: 12px; }
+        .file-item { background: #f0fdf4; padding: 10px; border-radius: 8px; border-left: 4px solid #10b981; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 12px; }
+        .file-item i { color: #10b981; margin-right: 6px; }
+
         .case-detail { background: white; padding: 12px; border-radius: 10px; margin-bottom: 10px; border-left: 4px solid #0ea5e9; }
         .case-detail-header { border-bottom: 2px solid #e5e7eb; padding-bottom: 8px; margin-bottom: 10px; }
         .case-detail-title { font-size: 13px; font-weight: 700; color: #1a3a52; }
@@ -101,6 +111,7 @@
             .sidebar { width: 260px; border-top: none; border-right: 1px solid #e5e7eb; flex-direction: column; order: 0; }
             .main-area { padding: 30px; order: 1; }
             .stats-grid { grid-template-columns: repeat(4, 1fr); }
+            .form-grid { grid-template-columns: repeat(2, 1fr); }
             .modal-content { border-radius: 12px; max-width: 800px; width: 90%; }
             .modal { justify-content: center; }
         }
@@ -265,6 +276,16 @@
                     <div class="form-group"><label class="form-label">Estado</label><select id="status"><option value="Pendiente">Pendiente</option><option value="En Trámite">En Trámite</option><option value="Finalizado">Finalizado</option></select></div>
                 </div>
             </div>
+            <div class="form-section">
+                <div class="form-section-title">📎 Archivos</div>
+                <div class="file-upload-area" id="fileUploadArea">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <div class="file-upload-text">Arrastra o toca para subir</div>
+                    <div class="file-upload-sub">PDF o Word (.pdf, .doc, .docx)</div>
+                    <input type="file" id="fileInput" accept=".pdf,.doc,.docx" style="display: none;" multiple>
+                </div>
+                <div class="file-list" id="fileList"></div>
+            </div>
         </div>
         <div class="modal-footer">
             <button class="btn btn-secondary" onclick="closeModal('newCaseModal')">Cancelar</button>
@@ -280,7 +301,67 @@ const PASSWORD = '3813';
 
 let currentUser = null;
 let cases = [];
+let uploadedFiles = [];
 let editingCaseId = null;
+
+// FILE UPLOAD
+document.addEventListener('DOMContentLoaded', function() {
+    const fileUploadArea = document.getElementById('fileUploadArea');
+    const fileInput = document.getElementById('fileInput');
+
+    if (fileUploadArea && fileInput) {
+        fileUploadArea.addEventListener('click', () => fileInput.click());
+        
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files) {
+                uploadedFiles = Array.from(e.target.files);
+                renderFileList();
+            }
+        });
+
+        fileUploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            fileUploadArea.style.background = '#e0f2fe';
+        });
+
+        fileUploadArea.addEventListener('dragleave', () => {
+            fileUploadArea.style.background = '#f0f9ff';
+        });
+
+        fileUploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            fileUploadArea.style.background = '#f0f9ff';
+            uploadedFiles = Array.from(e.dataTransfer.files);
+            renderFileList();
+        });
+    }
+});
+
+function renderFileList() {
+    const fileList = document.getElementById('fileList');
+    fileList.innerHTML = '';
+    if (uploadedFiles.length > 0) {
+        fileList.innerHTML = '<div style="font-size: 11px; color: #6b7280; margin-bottom: 8px; font-weight: 600;">📁 Archivos seleccionados:</div>';
+    }
+    uploadedFiles.forEach((file, index) => {
+        const icon = file.type.includes('pdf') ? 'fa-file-pdf' : 'fa-file-word';
+        fileList.innerHTML += `
+            <div class="file-item">
+                <div style="flex: 1;">
+                    <i class="fas ${icon}" style="color: ${file.type.includes('pdf') ? '#ef4444' : '#2563eb'}; margin-right: 6px;"></i> 
+                    ${file.name}
+                </div>
+                <button onclick="removeFile(${index})" style="background: #ef4444; color: white; border: none; padding: 3px 6px; border-radius: 3px; cursor: pointer; font-size: 12px;">✕</button>
+            </div>
+        `;
+    });
+}
+
+function removeFile(index) {
+    uploadedFiles.splice(index, 1);
+    document.getElementById('fileInput').value = '';
+    renderFileList();
+}
 
 async function sbFetch(endpoint, method = 'GET', body = null) {
     const url = `${SUPABASE_URL}/rest/v1/${endpoint}`;
@@ -445,6 +526,7 @@ async function saveCase() {
         dependencia: document.getElementById('department').value,
         tecnico_principal: document.getElementById('mainTechnician').value,
         estado: document.getElementById('status').value,
+        archivos: uploadedFiles.map(f => f.name).join(','),
         usuario_creador: currentUser.firstName,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
@@ -483,6 +565,10 @@ function editCase(caseId) {
     document.getElementById('mainTechnician').value = caseItem.tecnico_principal || '';
     document.getElementById('status').value = caseItem.estado || 'Pendiente';
 
+    uploadedFiles = [];
+    document.getElementById('fileInput').value = '';
+    document.getElementById('fileList').innerHTML = '';
+
     openModal('newCaseModal');
 }
 
@@ -515,6 +601,9 @@ function resetForm() {
     document.getElementById('suspect').value = '';
     document.getElementById('mainTechnician').value = '';
     document.getElementById('status').value = 'Pendiente';
+    uploadedFiles = [];
+    document.getElementById('fileInput').value = '';
+    document.getElementById('fileList').innerHTML = '';
 }
 
 function openModal(id) { document.getElementById(id).classList.add('active'); }
