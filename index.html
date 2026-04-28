@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SIGOL</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         *{margin:0;padding:0;box-sizing:border-box}
         body{font-family:Arial,sans-serif;background:#f5f7fa}
@@ -21,7 +22,7 @@
         .header{background:#1a3a52;color:#fff;padding:15px;display:flex;justify-content:space-between;align-items:center}
         .container{display:flex;height:calc(100vh-50px)}
         .sidebar{width:250px;background:#fff;padding:20px;border-right:1px solid #ddd;overflow-y:auto}
-        .menu-item{padding:10px;margin:5px 0;cursor:pointer;border-radius:5px;font-size:12px}
+        .menu-item{padding:10px;margin:5px 0;cursor:pointer;border-radius:5px;font-size:12px;display:flex;align-items:center;gap:8px}
         .menu-item.active{background:#0ea5e9;color:#fff;font-weight:bold}
         .content{flex:1;padding:20px;overflow-y:auto}
         .section{display:none}
@@ -49,10 +50,19 @@
         .search-box{background:#fff;padding:15px;border-radius:5px;margin-bottom:15px;box-shadow:0 1px 3px rgba(0,0,0,0.1)}
         .btn{padding:8px 12px;background:#1a3a52;color:#fff;border:none;border-radius:5px;cursor:pointer;font-size:12px;font-weight:bold}
         .btn-sec{background:#ddd;color:#333}
+        .file-upload{border:2px dashed #0ea5e9;border-radius:5px;padding:15px;text-align:center;cursor:pointer;background:#f0f9ff;margin-bottom:10px}
+        .file-upload:hover{background:#e0f2fe}
+        .file-list{margin-top:10px}
+        .file-item{background:#f0fdf4;padding:8px;border-radius:5px;margin-bottom:5px;border-left:4px solid #10b981;display:flex;justify-content:space-between;align-items:center;font-size:11px}
+        .contact-box{background:#fff;padding:15px;border-radius:5px;box-shadow:0 1px 3px rgba(0,0,0,0.1)}
+        .contact-title{font-weight:bold;margin-bottom:5px}
+        .contact-email{font-size:12px;color:#0ea5e9;margin-bottom:10px}
+        .btn-group{display:flex;gap:5px}
+        .btn-sm{padding:5px 8px;font-size:11px}
         @media(max-width:768px){
             .sidebar{width:100%;flex-direction:row;display:grid;grid-template-columns:repeat(4,1fr);gap:5px;padding:10px;height:auto;border:none;border-top:1px solid #ddd;order:2}
             .container{flex-direction:column-reverse}
-            .menu-item{padding:8px;text-align:center}
+            .menu-item{padding:8px;text-align:center;flex-direction:column}
             .stats{grid-template-columns:repeat(2,1fr);gap:10px}
             .form-grid{grid-template-columns:1fr}
         }
@@ -94,10 +104,10 @@
     </div>
     <div class="container">
         <div class="sidebar">
-            <div class="menu-item active" onclick="showSection('dashboard')">Panel</div>
-            <div class="menu-item" onclick="showSection('new')">Nuevo</div>
-            <div class="menu-item" onclick="showSection('list')">Oficios</div>
-            <div class="menu-item" onclick="showSection('contacts')">Contactos</div>
+            <div class="menu-item active" onclick="showSection('dashboard')"><i class="fas fa-chart-line"></i> Panel</div>
+            <div class="menu-item" onclick="showSection('new')"><i class="fas fa-plus-circle"></i> Nuevo</div>
+            <div class="menu-item" onclick="showSection('list')"><i class="fas fa-list"></i> Oficios</div>
+            <div class="menu-item" onclick="showSection('contacts')"><i class="fas fa-envelope"></i> Contactos</div>
         </div>
         <div class="content">
             <div id="section-dashboard" class="section active">
@@ -132,15 +142,21 @@
             <div id="section-contacts" class="section">
                 <h3 style="margin-bottom:15px">Contactos</h3>
                 <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:15px">
-                    <div style="background:#fff;padding:15px;border-radius:5px;box-shadow:0 1px 3px rgba(0,0,0,0.1)">
-                        <div style="font-weight:bold;margin-bottom:5px">Delitos Telematicos</div>
-                        <div style="font-size:12px;margin-bottom:10px">divdtelematicos@outlook.com</div>
-                        <button class="btn" onclick="window.open('https://outlook.live.com')" style="font-size:11px">Email</button>
+                    <div class="contact-box">
+                        <div class="contact-title">Delitos Telematicos</div>
+                        <div class="contact-email">divdtelematicos@outlook.com</div>
+                        <div class="btn-group">
+                            <button class="btn btn-sm" onclick="window.open('https://outlook.live.com')"><i class="fas fa-envelope"></i></button>
+                            <button class="btn btn-sm" onclick="window.open('https://drive.google.com')"><i class="fas fa-cloud"></i></button>
+                        </div>
                     </div>
-                    <div style="background:#fff;padding:15px;border-radius:5px;box-shadow:0 1px 3px rgba(0,0,0,0.1)">
-                        <div style="font-weight:bold;margin-bottom:5px">Laboratorio Fotografico</div>
-                        <div style="font-size:12px;margin-bottom:10px">laboratorio@outlook.com</div>
-                        <button class="btn" onclick="window.open('https://outlook.live.com')" style="font-size:11px">Email</button>
+                    <div class="contact-box">
+                        <div class="contact-title">Laboratorio Fotografico</div>
+                        <div class="contact-email">laboratorio@outlook.com</div>
+                        <div class="btn-group">
+                            <button class="btn btn-sm" onclick="window.open('https://outlook.live.com')"><i class="fas fa-envelope"></i></button>
+                            <button class="btn btn-sm" onclick="window.open('https://drive.google.com')"><i class="fas fa-cloud"></i></button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -179,6 +195,11 @@
                     <div><label>Estado</label><select id="estado"><option value="Pendiente">Pendiente</option><option value="En Tramite">En Tramite</option><option value="Finalizado">Finalizado</option></select></div>
                 </div>
             </div>
+            <div class="form-section">
+                <div style="font-weight:bold;margin-bottom:10px">Archivos</div>
+                <div class="file-upload" id="fileUpload"><i class="fas fa-cloud-upload-alt"></i><div>Arrastra o haz clic para subir PDF/Word</div></div>
+                <div class="file-list" id="fileList"></div>
+            </div>
         </div>
         <div class="modal-footer">
             <button class="btn btn-sec" onclick="closeModal('newModal')">Cancelar</button>
@@ -197,12 +218,45 @@ let supa=null;
 let user=null;
 let data=[];
 let editing=null;
+let files=[];
 
 function getSupa(){
     if(!supa&&window.supabase){
         supa=window.supabase.createClient(SUPA_URL,SUPA_KEY);
     }
     return supa;
+}
+
+document.getElementById('fileUpload')?.addEventListener('click',()=>document.getElementById('fileInput')?.click());
+document.getElementById('fileUpload')?.addEventListener('dragover',e=>{e.preventDefault();e.target.style.background='#e0f2fe'});
+document.getElementById('fileUpload')?.addEventListener('dragleave',e=>{e.target.style.background='#f0f9ff'});
+document.getElementById('fileUpload')?.addEventListener('drop',e=>{
+    e.preventDefault();
+    e.target.style.background='#f0f9ff';
+    files=Array.from(e.dataTransfer.files);
+    renderFiles();
+});
+
+let fileInput=document.createElement('input');
+fileInput.type='file';
+fileInput.id='fileInput';
+fileInput.accept='.pdf,.doc,.docx';
+fileInput.multiple=true;
+fileInput.style.display='none';
+fileInput.addEventListener('change',e=>{files=Array.from(e.target.files);renderFiles()});
+document.body.appendChild(fileInput);
+
+function renderFiles(){
+    const l=document.getElementById('fileList');
+    l.innerHTML='';
+    files.forEach((f,i)=>{
+        l.innerHTML+=`<div class="file-item"><span><i class="fas fa-file"></i> ${f.name}</span><button class="btn btn-sm" onclick="removeFile(${i})" style="background:#ef4444;padding:3px 6px">×</button></div>`;
+    });
+}
+
+function removeFile(i){
+    files.splice(i,1);
+    renderFiles();
 }
 
 function login(){
@@ -262,17 +316,20 @@ async function load(){
 function render(){
     const t=document.getElementById('table');
     const l=document.getElementById('list');
-    const p=document.getElementById('pend');
-    const tr=document.getElementById('tram');
-    const f=document.getElementById('final');
     
     document.getElementById('total').textContent=data.length;
-    p.textContent=data.filter(x=>x.estado==='Pendiente').length;
-    tr.textContent=data.filter(x=>x.estado==='En Tramite').length;
-    f.textContent=data.filter(x=>x.estado==='Finalizado').length;
+    document.getElementById('pend').textContent=data.filter(x=>x.estado==='Pendiente').length;
+    document.getElementById('tram').textContent=data.filter(x=>x.estado==='En Tramite').length;
+    document.getElementById('final').textContent=data.filter(x=>x.estado==='Finalizado').length;
     
     t.innerHTML='';
     l.innerHTML='';
+    
+    if(data.length===0){
+        t.innerHTML='<tr><td colspan="4" style="text-align:center">Sin oficios</td></tr>';
+        l.innerHTML='<p style="text-align:center;color:#999">Sin oficios</p>';
+        return;
+    }
     
     data.forEach(x=>{
         const col=x.estado==='Pendiente'?'badge-p':x.estado==='En Tramite'?'badge-t':'badge-f';
@@ -291,6 +348,10 @@ function filterTable(){
         const st=!f||x.estado===f;
         return m&&st;
     });
+    if(fil.length===0){
+        t.innerHTML='<tr><td colspan="4" style="text-align:center">Sin oficios</td></tr>';
+        return;
+    }
     fil.forEach(x=>{
         const col=x.estado==='Pendiente'?'badge-p':x.estado==='En Tramite'?'badge-t':'badge-f';
         t.innerHTML+=`<tr><td>${x.numero_legajo}</td><td>${x.tecnico_principal||'-'}</td><td><span class="badge ${col}">${x.estado}</span></td><td><button class="btn" style="padding:3px 6px;font-size:10px" onclick="edit(${x.id})">E</button></td></tr>`;
@@ -311,6 +372,7 @@ async function save(){
         tecnico_principal:document.getElementById('tecnico').value,
         estado:document.getElementById('estado').value,
         usuario_creador:user.n,
+        archivos:files.map(f=>f.name).join(','),
         created_at:new Date().toISOString(),
         updated_at:new Date().toISOString()
     };
@@ -324,6 +386,7 @@ async function save(){
         }
         closeModal('newModal');
         editing=null;
+        files=[];
         await load();
     }catch(e){
         alert('Error: '+e.message);
@@ -344,6 +407,8 @@ function edit(id){
     document.getElementById('division').value=x.dependencia||'';
     document.getElementById('tecnico').value=x.tecnico_principal||'';
     document.getElementById('estado').value=x.estado||'';
+    files=[];
+    renderFiles();
     openModal('newModal');
 }
 
@@ -378,14 +443,17 @@ function closeModal(id){
         document.getElementById('division').value='TELEMATICO';
         document.getElementById('tecnico').value='';
         document.getElementById('estado').value='Pendiente';
+        files=[];
+        renderFiles();
     }
+    editing=null;
 }
 
 function showSection(s){
     document.querySelectorAll('.section').forEach(x=>x.classList.remove('active'));
     document.getElementById('section-'+s).classList.add('active');
     document.querySelectorAll('.menu-item').forEach(x=>x.classList.remove('active'));
-    event.target.classList.add('active');
+    event.target.closest('.menu-item').classList.add('active');
 }
 
 document.querySelectorAll('.modal').forEach(m=>{
