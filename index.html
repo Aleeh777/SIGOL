@@ -4,163 +4,143 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SIGOL</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         *{margin:0;padding:0;box-sizing:border-box}
-        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f7fa}
-        #loginScreen{display:flex;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(135deg,#0f172a,#1a3a52);padding:20px}
-        #loginScreen.hidden{display:none}
-        .login-box{background:#fff;padding:50px 30px;border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,0.3);width:100%;max-width:420px}
-        .login-logo{font-size:52px;font-weight:900;color:#1a3a52;margin-bottom:12px;text-align:center}
-        .login-subtitle{color:#9ca3af;font-size:13px;text-transform:uppercase;letter-spacing:2px;text-align:center;margin-bottom:40px}
+        body{font-family:Arial,sans-serif;background:#f5f7fa}
+        #loginScreen{display:flex;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(135deg,#0f172a,#1a3a52)}
+        .login-box{background:#fff;padding:50px;border-radius:10px;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+        .login-logo{font-size:48px;font-weight:900;color:#1a3a52;text-align:center;margin-bottom:10px}
+        .login-sub{text-align:center;color:#999;font-size:12px;margin-bottom:40px}
         .form-group{margin-bottom:20px}
-        .form-label{display:block;font-size:12px;font-weight:700;color:#1a3a52;margin-bottom:8px;text-transform:uppercase}
-        input,select{width:100%;padding:14px;border:1.5px solid #e5e7eb;border-radius:10px;font-size:15px}
-        input:focus,select:focus{outline:0;border-color:#0ea5e9;box-shadow:0 0 0 3px rgba(14,165,233,0.1)}
-        .login-button{width:100%;padding:14px;background:linear-gradient(135deg,#1a3a52,#2a4f6f);color:#fff;border:0;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;text-transform:uppercase;margin-top:10px}
-        .error-msg{background:#fee;color:#c33;padding:12px;border-radius:8px;margin-bottom:15px;display:none;border-left:4px solid #f33}
-        .error-msg.show{display:block}
-        #dashboardScreen{display:none;height:100vh;flex-direction:column;background:#f5f7fa}
-        #dashboardScreen.active{display:flex}
-        .dashboard-header{background:linear-gradient(135deg,#1a3a52,#2a4f6f);color:#fff;padding:14px 16px;display:flex;justify-content:space-between;align-items:center}
-        .header-title{font-size:18px;font-weight:800}
-        .user-info{text-align:right;font-size:10px}
-        .logout-button{background:rgba(255,255,255,0.2);color:#fff;border:1px solid rgba(255,255,255,0.3);padding:5px 10px;border-radius:6px;cursor:pointer;font-size:10px;font-weight:600}
-        .main-container{display:flex;flex:1;overflow:hidden}
-        .sidebar{width:260px;background:#fff;border-right:1px solid #e5e7eb;padding:20px;overflow-y:auto;display:flex;flex-direction:column;gap:10px}
-        .sidebar-item{padding:12px 16px;cursor:pointer;font-size:12px;color:#6b7280;border-radius:8px;border-left:3px solid transparent;transition:all 0.2s}
-        .sidebar-item:hover{background:#f3f4f6}
-        .sidebar-item.active{color:#0ea5e9;background:rgba(14,165,233,0.05);border-left-color:#0ea5e9;font-weight:600}
-        .main-area{flex:1;overflow-y:auto;padding:30px}
+        label{display:block;color:#1a3a52;font-weight:bold;font-size:12px;margin-bottom:5px}
+        input{width:100%;padding:12px;border:1px solid #ddd;border-radius:5px;font-size:14px}
+        button{width:100%;padding:12px;background:#1a3a52;color:#fff;border:none;border-radius:5px;font-weight:bold;cursor:pointer;font-size:14px}
+        button:active{transform:scale(0.98)}
+        .error{background:#fee;color:#c33;padding:10px;border-radius:5px;margin-bottom:15px;display:none;font-size:12px}
+        #dashboardScreen{display:none}
+        .header{background:#1a3a52;color:#fff;padding:15px;display:flex;justify-content:space-between;align-items:center}
+        .container{display:flex;height:calc(100vh-50px)}
+        .sidebar{width:250px;background:#fff;padding:20px;border-right:1px solid #ddd;overflow-y:auto}
+        .menu-item{padding:10px;margin:5px 0;cursor:pointer;border-radius:5px;font-size:12px}
+        .menu-item.active{background:#0ea5e9;color:#fff;font-weight:bold}
+        .content{flex:1;padding:20px;overflow-y:auto}
         .section{display:none}
         .section.active{display:block}
-        .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:30px}
-        .stat-card{background:#fff;padding:20px;border-radius:10px;box-shadow:0 1px 3px rgba(0,0,0,0.08);border-top:3px solid #0ea5e9}
-        .stat-label{font-size:10px;color:#6b7280;font-weight:600;text-transform:uppercase;margin-bottom:8px}
-        .stat-number{font-size:32px;font-weight:800;color:#1a3a52}
-        .search-box{background:#fff;padding:16px;border-radius:10px;box-shadow:0 1px 3px rgba(0,0,0,0.08);margin-bottom:20px}
-        .search-bar{width:100%;padding:10px;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;margin-bottom:10px}
-        .btn{padding:10px 16px;border:0;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;text-transform:uppercase}
-        .btn-primary{background:linear-gradient(135deg,#1a3a52,#2a4f6f);color:#fff}
-        .btn-secondary{background:#e5e7eb;color:#374151}
-        table{width:100%;border-collapse:collapse;background:#fff;border-radius:10px;box-shadow:0 1px 3px rgba(0,0,0,0.08);overflow:hidden}
-        thead{background:linear-gradient(90deg,#f3f4f6,#e5e7eb)}
-        th{padding:12px;text-align:left;font-weight:700;color:#1a3a52;font-size:11px;text-transform:uppercase}
-        td{padding:12px;border-bottom:1px solid #e5e7eb}
-        .status-badge{display:inline-block;padding:4px 8px;border-radius:12px;font-size:10px;font-weight:600}
-        .status-pending{background:rgba(245,158,11,0.1);color:#b45309}
-        .status-progress{background:rgba(59,130,246,0.1);color:#1e40af}
-        .status-finished{background:rgba(16,185,129,0.1);color:#065f46}
-        .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:2000;align-items:center;justify-content:center}
+        .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;margin-bottom:20px}
+        .stat{background:#fff;padding:15px;border-radius:5px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,0.1);border-top:3px solid #0ea5e9}
+        .stat-num{font-size:32px;font-weight:bold;color:#1a3a52}
+        .stat-label{font-size:11px;color:#999}
+        table{width:100%;border-collapse:collapse;background:#fff;border-radius:5px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.1)}
+        th{background:#f5f5f5;padding:10px;text-align:left;font-weight:bold;font-size:12px}
+        td{padding:10px;border-bottom:1px solid #eee}
+        .badge{display:inline-block;padding:3px 6px;border-radius:3px;font-size:10px;font-weight:bold}
+        .badge-p{background:#fff3cd;color:#856404}
+        .badge-t{background:#cfe2ff;color:#084298}
+        .badge-f{background:#d1e7dd;color:#0f5132}
+        .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center}
         .modal.active{display:flex}
-        .modal-content{background:#fff;border-radius:12px;max-height:80vh;overflow-y:auto;width:90%;max-width:800px}
-        .modal-header{padding:20px;border-bottom:1px solid #e5e7eb;display:flex;justify-content:space-between;align-items:center}
-        .modal-title{font-size:18px;font-weight:700;color:#1a3a52}
-        .modal-close{background:0;border:0;font-size:28px;color:#6b7280;cursor:pointer}
-        .modal-body{padding:20px}
-        .modal-footer{padding:20px;border-top:1px solid #e5e7eb;display:flex;gap:10px;justify-content:flex-end}
-        .form-section{margin-bottom:20px}
-        .form-section-title{font-size:12px;font-weight:700;color:#1a3a52;text-transform:uppercase;margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid #0ea5e9}
-        .form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
-        .case-card{background:#fff;padding:16px;border-radius:10px;margin-bottom:12px;border-left:4px solid #0ea5e9;box-shadow:0 1px 3px rgba(0,0,0,0.08)}
-        .case-title{font-size:14px;font-weight:700;color:#1a3a52;margin-bottom:8px}
-        @media(max-width:767px){
-            .sidebar{width:100%;flex-direction:row;border-right:0;border-top:1px solid #e5e7eb;padding:0;order:2}
-            .sidebar-item{flex:1;border-left:0;border-top:3px solid transparent;border-radius:0;padding:12px}
-            .sidebar-item.active{border-top-color:#0ea5e9;border-left:0}
-            .main-container{flex-direction:column-reverse}
-            .main-area{padding:16px}
-            .stats-grid{grid-template-columns:repeat(2,1fr)}
+        .modal-box{background:#fff;width:90%;max-width:700px;border-radius:10px;max-height:80vh;overflow-y:auto}
+        .modal-header{padding:15px;border-bottom:1px solid #ddd;font-weight:bold;font-size:16px;display:flex;justify-content:space-between}
+        .modal-close{cursor:pointer;font-size:20px;background:none;border:none;color:#999}
+        .modal-body{padding:15px}
+        .modal-footer{padding:15px;border-top:1px solid #ddd;display:flex;gap:10px;justify-content:flex-end}
+        .form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+        .form-section{margin-bottom:15px;padding-bottom:15px;border-bottom:1px solid #eee}
+        .search-box{background:#fff;padding:15px;border-radius:5px;margin-bottom:15px;box-shadow:0 1px 3px rgba(0,0,0,0.1)}
+        .btn{padding:8px 12px;background:#1a3a52;color:#fff;border:none;border-radius:5px;cursor:pointer;font-size:12px;font-weight:bold}
+        .btn-sec{background:#ddd;color:#333}
+        @media(max-width:768px){
+            .sidebar{width:100%;flex-direction:row;display:grid;grid-template-columns:repeat(4,1fr);gap:5px;padding:10px;height:auto;border:none;border-top:1px solid #ddd;order:2}
+            .container{flex-direction:column-reverse}
+            .menu-item{padding:8px;text-align:center}
+            .stats{grid-template-columns:repeat(2,1fr);gap:10px}
             .form-grid{grid-template-columns:1fr}
         }
     </style>
 </head>
 <body>
+
 <div id="loginScreen">
     <div class="login-box">
         <div class="login-logo">SIGOL</div>
-        <div class="login-subtitle">Sistema de Gestion de Oficios</div>
-        <div id="errorMsg" class="error-msg"></div>
+        <div class="login-sub">Sistema de Gestion de Oficios</div>
+        <div class="error" id="errorMsg"></div>
         <div class="form-group">
-            <label class="form-label">Nombre</label>
+            <label>Nombre</label>
             <input type="text" id="firstName" placeholder="Juan">
         </div>
         <div class="form-group">
-            <label class="form-label">Apellido</label>
+            <label>Apellido</label>
             <input type="text" id="lastName" placeholder="Garcia">
         </div>
         <div class="form-group">
-            <label class="form-label">Numero de Legajo</label>
+            <label>Numero de Legajo</label>
             <input type="text" id="legajoNumber" placeholder="2847">
         </div>
         <div class="form-group">
-            <label class="form-label">Clave de Acceso</label>
-            <input type="password" id="password" placeholder="••••••••">
+            <label>Clave</label>
+            <input type="password" id="password" placeholder="Clave">
         </div>
-        <button class="login-button" onclick="doLogin()">Ingresar al Sistema</button>
+        <button onclick="login()">INGRESAR</button>
     </div>
 </div>
 
 <div id="dashboardScreen">
-    <div class="dashboard-header">
-        <div class="header-title">SIGOL</div>
-        <div style="display:flex;align-items:center;gap:12px">
-            <div class="user-info">
-                <div style="font-weight:700" id="userFullName">Usuario</div>
-                <div id="userPosition">Legajo</div>
-            </div>
-            <button class="logout-button" onclick="doLogout()">Cerrar</button>
+    <div class="header">
+        <div>SIGOL</div>
+        <div style="font-size:12px">
+            <span id="userFullName"></span> | <button onclick="logout()" style="background:none;color:#fff;border:none;cursor:pointer;text-decoration:underline;font-size:12px">Cerrar</button>
         </div>
     </div>
-    <div class="main-container">
+    <div class="container">
         <div class="sidebar">
-            <div class="sidebar-item active" onclick="switchSection('dashboard',this)"><i class="fas fa-chart-line"></i> Panel</div>
-            <div class="sidebar-item" onclick="switchSection('new-case',this)"><i class="fas fa-plus-circle"></i> Nuevo</div>
-            <div class="sidebar-item" onclick="switchSection('cases',this)"><i class="fas fa-list"></i> Oficios</div>
-            <div class="sidebar-item" onclick="switchSection('contacts',this)"><i class="fas fa-envelope"></i> Contactos</div>
+            <div class="menu-item active" onclick="showSection('dashboard')">Panel</div>
+            <div class="menu-item" onclick="showSection('new')">Nuevo</div>
+            <div class="menu-item" onclick="showSection('list')">Oficios</div>
+            <div class="menu-item" onclick="showSection('contacts')">Contactos</div>
         </div>
-        <div class="main-area">
+        <div class="content">
             <div id="section-dashboard" class="section active">
-                <div class="stats-grid">
-                    <div class="stat-card"><div class="stat-label">Total</div><div class="stat-number" id="totalCases">0</div></div>
-                    <div class="stat-card"><div class="stat-label">Pendientes</div><div class="stat-number" id="countPending">0</div></div>
-                    <div class="stat-card"><div class="stat-label">En Tramite</div><div class="stat-number" id="countProgress">0</div></div>
-                    <div class="stat-card"><div class="stat-label">Finalizados</div><div class="stat-number" id="countFinished">0</div></div>
+                <div class="stats">
+                    <div class="stat"><div class="stat-num" id="total">0</div><div class="stat-label">Total</div></div>
+                    <div class="stat"><div class="stat-num" id="pend">0</div><div class="stat-label">Pendientes</div></div>
+                    <div class="stat"><div class="stat-num" id="tram">0</div><div class="stat-label">Tramite</div></div>
+                    <div class="stat"><div class="stat-num" id="final">0</div><div class="stat-label">Finalizados</div></div>
                 </div>
                 <div class="search-box">
-                    <input type="text" class="search-bar" id="mainSearch" placeholder="Buscar por legajo..." onkeyup="filterCases()">
-                    <select id="filterStatus" onchange="filterCases()">
-                        <option value="">Todos los Estados</option>
+                    <input type="text" id="search" placeholder="Buscar legajo..." onkeyup="filterTable()">
+                    <select id="filterState" onchange="filterTable()" style="width:100%;padding:8px;margin-top:5px;border:1px solid #ddd;border-radius:5px">
+                        <option value="">Todos</option>
                         <option value="Pendiente">Pendiente</option>
                         <option value="En Tramite">En Tramite</option>
                         <option value="Finalizado">Finalizado</option>
                     </select>
                 </div>
-                <button class="btn btn-primary" onclick="openModal('newCaseModal')" style="margin-bottom:20px"><i class="fas fa-plus"></i> Nuevo Oficio</button>
+                <button class="btn" onclick="openModal('newModal')" style="margin-bottom:15px">+ Nuevo Oficio</button>
                 <table>
-                    <thead><tr><th>Legajo</th><th>Tecnico</th><th>Estado</th><th>Acciones</th></tr></thead>
-                    <tbody id="casesTable"><tr><td colspan="4" style="text-align:center">Cargando...</td></tr></tbody>
+                    <thead><tr><th>Legajo</th><th>Tecnico</th><th>Estado</th><th>Acc</th></tr></thead>
+                    <tbody id="table"></tbody>
                 </table>
             </div>
-            <div id="section-new-case" class="section">
-                <button class="btn btn-primary" onclick="openModal('newCaseModal')" style="width:100%;padding:16px"><i class="fas fa-plus"></i> Crear Nuevo Oficio</button>
+            <div id="section-new" class="section">
+                <button class="btn" onclick="openModal('newModal')" style="width:100%;padding:15px;font-size:14px">+ Crear Oficio</button>
             </div>
-            <div id="section-cases" class="section">
-                <h2 style="color:#1a3a52;margin-bottom:20px">Oficios</h2>
-                <div id="casesList"></div>
+            <div id="section-list" class="section">
+                <h3 style="margin-bottom:15px">Oficios</h3>
+                <div id="list"></div>
             </div>
             <div id="section-contacts" class="section">
-                <h2 style="color:#1a3a52;margin-bottom:20px">Contactos</h2>
-                <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px">
-                    <div class="case-card">
-                        <div class="case-title">Delitos Telematicos</div>
-                        <div style="font-size:12px;margin-bottom:12px">divdtelematicos@outlook.com</div>
-                        <button class="btn btn-primary" style="font-size:10px;padding:6px 8px" onclick="window.open('https://outlook.live.com')"><i class="fas fa-envelope"></i></button>
+                <h3 style="margin-bottom:15px">Contactos</h3>
+                <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:15px">
+                    <div style="background:#fff;padding:15px;border-radius:5px;box-shadow:0 1px 3px rgba(0,0,0,0.1)">
+                        <div style="font-weight:bold;margin-bottom:5px">Delitos Telematicos</div>
+                        <div style="font-size:12px;margin-bottom:10px">divdtelematicos@outlook.com</div>
+                        <button class="btn" onclick="window.open('https://outlook.live.com')" style="font-size:11px">Email</button>
                     </div>
-                    <div class="case-card">
-                        <div class="case-title">Laboratorio Fotografico</div>
-                        <div style="font-size:12px;margin-bottom:12px">laboratorio@outlook.com</div>
-                        <button class="btn btn-primary" style="font-size:10px;padding:6px 8px" onclick="window.open('https://outlook.live.com')"><i class="fas fa-envelope"></i></button>
+                    <div style="background:#fff;padding:15px;border-radius:5px;box-shadow:0 1px 3px rgba(0,0,0,0.1)">
+                        <div style="font-weight:bold;margin-bottom:5px">Laboratorio Fotografico</div>
+                        <div style="font-size:12px;margin-bottom:10px">laboratorio@outlook.com</div>
+                        <button class="btn" onclick="window.open('https://outlook.live.com')" style="font-size:11px">Email</button>
                     </div>
                 </div>
             </div>
@@ -168,242 +148,259 @@
     </div>
 </div>
 
-<div class="modal" id="newCaseModal">
-    <div class="modal-content">
+<div class="modal" id="newModal">
+    <div class="modal-box">
         <div class="modal-header">
-            <div class="modal-title" id="modalTitle">Crear Oficio</div>
-            <button class="modal-close" onclick="closeModal('newCaseModal')">&times;</button>
+            <span id="modalTitle">Crear Oficio</span>
+            <button class="modal-close" onclick="closeModal('newModal')">×</button>
         </div>
         <div class="modal-body">
             <div class="form-section">
-                <div class="form-section-title">Informacion</div>
+                <div style="font-weight:bold;margin-bottom:10px">Informacion</div>
                 <div class="form-grid">
-                    <div class="form-group"><label class="form-label">Legajo</label><input type="text" id="caseNumber"></div>
-                    <div class="form-group"><label class="form-label">Causa</label><input type="text" id="caseName"></div>
-                    <div class="form-group"><label class="form-label">Fiscalia</label><input type="text" id="prosecutor"></div>
-                    <div class="form-group"><label class="form-label">Fecha</label><input type="date" id="receiveDate"></div>
+                    <div><label>Legajo</label><input type="text" id="legajo"></div>
+                    <div><label>Causa</label><input type="text" id="causa"></div>
+                    <div><label>Fiscalia</label><input type="text" id="fiscalia"></div>
+                    <div><label>Fecha</label><input type="date" id="fecha"></div>
                 </div>
             </div>
             <div class="form-section">
-                <div class="form-section-title">Personas</div>
+                <div style="font-weight:bold;margin-bottom:10px">Personas</div>
                 <div class="form-grid">
-                    <div class="form-group"><label class="form-label">Victima</label><input type="text" id="victim"></div>
-                    <div class="form-group"><label class="form-label">Causante</label><input type="text" id="suspect"></div>
+                    <div><label>Victima</label><input type="text" id="victima"></div>
+                    <div><label>Causante</label><input type="text" id="causante"></div>
                 </div>
             </div>
             <div class="form-section">
-                <div class="form-section-title">Asignacion</div>
+                <div style="font-weight:bold;margin-bottom:10px">Asignacion</div>
                 <div class="form-grid">
-                    <div class="form-group"><label class="form-label">Division</label><select id="department"><option value="TELEMATICO">Delitos Telematicos</option><option value="LABORATORIO">Laboratorio Fotografico</option></select></div>
-                    <div class="form-group"><label class="form-label">Tecnico</label><input type="text" id="mainTechnician"></div>
-                    <div class="form-group"><label class="form-label">Estado</label><select id="status"><option value="Pendiente">Pendiente</option><option value="En Tramite">En Tramite</option><option value="Finalizado">Finalizado</option></select></div>
+                    <div><label>Division</label><select id="division"><option value="TELEMATICO">Delitos Telematicos</option><option value="LABORATORIO">Laboratorio</option></select></div>
+                    <div><label>Tecnico</label><input type="text" id="tecnico"></div>
+                    <div><label>Estado</label><select id="estado"><option value="Pendiente">Pendiente</option><option value="En Tramite">En Tramite</option><option value="Finalizado">Finalizado</option></select></div>
                 </div>
             </div>
         </div>
         <div class="modal-footer">
-            <button class="btn btn-secondary" onclick="closeModal('newCaseModal')">Cancelar</button>
-            <button class="btn btn-primary" onclick="saveCase()">Guardar</button>
+            <button class="btn btn-sec" onclick="closeModal('newModal')">Cancelar</button>
+            <button class="btn" onclick="save()">Guardar</button>
         </div>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const SUPABASE_URL='https://gmbhptqijgrlxosfskva.supabase.co';
-const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdtYmhwdHFpamdybHhvc2Zza3ZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwNjIyNTAsImV4cCI6MjA5MjYzODI1MH0.FQRwIjvLeXUaNM_Vx2R2KLuYJyWgNrjmuP85QTdRBLY';
-const PASSWORD='3813';
-let supabase;
-let currentUser=null;
-let cases=[];
-let editingCaseId=null;
+const SUPA_URL='https://gmbhptqijgrlxosfskva.supabase.co';
+const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdtYmhwdHFpamdybHhvc2Zza3ZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwNjIyNTAsImV4cCI6MjA5MjYzODI1MH0.FQRwIjvLeXUaNM_Vx2R2KLuYJyWgNrjmuP85QTdRBLY';
+const CLAVE='3813';
 
-function initSupabase(){
-    if(!window.supabase)return setTimeout(initSupabase,100);
-    supabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+let supa=null;
+let user=null;
+let data=[];
+let editing=null;
+
+function getSupa(){
+    if(!supa&&window.supabase){
+        supa=window.supabase.createClient(SUPA_URL,SUPA_KEY);
+    }
+    return supa;
 }
-initSupabase();
 
-function doLogin(){
+function login(){
     const f=document.getElementById('firstName').value.trim();
     const l=document.getElementById('lastName').value.trim();
     const leg=document.getElementById('legajoNumber').value.trim();
     const p=document.getElementById('password').value;
-    const e=document.getElementById('errorMsg');
-    e.classList.remove('show');
-    if(!f||!l||!leg||!p){e.textContent='Completa todos';e.classList.add('show');return}
-    if(p!==PASSWORD){e.textContent='Clave incorrecta';e.classList.add('show');return}
-    if(!/^\d+$/.test(leg)){e.textContent='Legajo numeros';e.classList.add('show');return}
-    currentUser={firstName:f,lastName:l,legajo:leg};
-    localStorage.setItem('sigolUser',JSON.stringify(currentUser));
-    document.getElementById('loginScreen').classList.add('hidden');
-    document.getElementById('dashboardScreen').classList.add('active');
+    const err=document.getElementById('errorMsg');
+    err.style.display='none';
+    
+    if(!f||!l||!leg||!p){
+        err.textContent='Completa todos los campos';
+        err.style.display='block';
+        return;
+    }
+    if(!/^\d+$/.test(leg)){
+        err.textContent='Legajo solo numeros';
+        err.style.display='block';
+        return;
+    }
+    if(p!==CLAVE){
+        err.textContent='Clave incorrecta';
+        err.style.display='block';
+        return;
+    }
+    
+    user={n:f,a:l,l:leg};
+    localStorage.setItem('su',JSON.stringify(user));
+    document.getElementById('loginScreen').style.display='none';
+    document.getElementById('dashboardScreen').style.display='block';
     document.getElementById('userFullName').textContent=f+' '+l;
-    document.getElementById('userPosition').textContent='Legajo #'+leg;
-    loadFromSupabase();
+    load();
 }
 
-function doLogout(){
-    if(confirm('Cerrar?')){
-        currentUser=null;
-        localStorage.removeItem('sigolUser');
-        document.getElementById('dashboardScreen').classList.remove('active');
-        document.getElementById('loginScreen').classList.remove('hidden');
+function logout(){
+    if(confirm('Cerrar sesion?')){
+        user=null;
+        localStorage.removeItem('su');
+        document.getElementById('dashboardScreen').style.display='none';
+        document.getElementById('loginScreen').style.display='flex';
     }
 }
 
-async function loadFromSupabase(){
-    if(!supabase)return;
+async function load(){
+    const s=getSupa();
+    if(!s)return setTimeout(load,200);
     try{
-        const{data,error}=await supabase.from('oficios').select('*').order('id',{ascending:false});
-        if(error)throw error;
-        cases=data||[];
-        updateStats();
-        renderTable();
-        renderCasesList();
-    }catch(err){
-        console.log('Error:',err);
+        const{data:d,error:e}=await s.from('oficios').select('*').order('id',{ascending:false});
+        if(e)throw e;
+        data=d||[];
+        render();
+    }catch(e){
+        console.log(e);
     }
 }
 
-function updateStats(){
-    document.getElementById('totalCases').textContent=cases.length;
-    document.getElementById('countPending').textContent=cases.filter(c=>c.estado==='Pendiente').length;
-    document.getElementById('countProgress').textContent=cases.filter(c=>c.estado==='En Tramite').length;
-    document.getElementById('countFinished').textContent=cases.filter(c=>c.estado==='Finalizado').length;
-}
-
-function filterCases(){renderTable()}
-
-function renderTable(){
-    const s=(document.getElementById('mainSearch')?.value||'').toLowerCase();
-    const st=document.getElementById('filterStatus')?.value||'';
-    const f=cases.filter(c=>{
-        const m=!s||c.numero_legajo?.toLowerCase().includes(s);
-        const ss=!st||c.estado===st;
-        return m&&ss;
-    });
-    const t=document.getElementById('casesTable');
+function render(){
+    const t=document.getElementById('table');
+    const l=document.getElementById('list');
+    const p=document.getElementById('pend');
+    const tr=document.getElementById('tram');
+    const f=document.getElementById('final');
+    
+    document.getElementById('total').textContent=data.length;
+    p.textContent=data.filter(x=>x.estado==='Pendiente').length;
+    tr.textContent=data.filter(x=>x.estado==='En Tramite').length;
+    f.textContent=data.filter(x=>x.estado==='Finalizado').length;
+    
     t.innerHTML='';
-    if(f.length===0){t.innerHTML='<tr><td colspan="4">Sin oficios</td></tr>';return}
-    f.forEach(c=>{
-        const st='status-'+(c.estado||'Pendiente').replace(/\s/g,'-').toLowerCase();
-        t.innerHTML+=`<tr><td>${c.numero_legajo}</td><td>${c.tecnico_principal||'-'}</td><td><span class="status-badge ${st}">${c.estado}</span></td><td><button onclick="editCase(${c.id})" class="btn" style="background:#0ea5e9;color:#fff;padding:4px 8px;font-size:10px">E</button> <button onclick="editStatus(${c.id})" class="btn" style="background:#10b981;color:#fff;padding:4px 8px;font-size:10px">S</button></td></tr>`;
+    l.innerHTML='';
+    
+    data.forEach(x=>{
+        const col=x.estado==='Pendiente'?'badge-p':x.estado==='En Tramite'?'badge-t':'badge-f';
+        t.innerHTML+=`<tr><td>${x.numero_legajo}</td><td>${x.tecnico_principal||'-'}</td><td><span class="badge ${col}">${x.estado}</span></td><td><button class="btn" style="padding:3px 6px;font-size:10px" onclick="edit(${x.id})">E</button></td></tr>`;
+        l.innerHTML+=`<div style="background:#fff;padding:12px;border-radius:5px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,0.1);border-left:4px solid #0ea5e9"><div style="font-weight:bold">${x.numero_legajo}</div><div style="font-size:11px;color:#666;margin:5px 0">${x.causa}</div><div style="font-size:11px;margin-bottom:8px"><b>F:</b> ${x.fiscalia} | <b>T:</b> ${x.tecnico_principal||'-'}</div><div style="margin-bottom:8px"><span class="badge" style="background:#0ea5e9;color:#fff">${x.estado}</span></div><button class="btn" style="padding:5px 8px;font-size:10px" onclick="edit(${x.id})">Editar</button> <button class="btn" style="padding:5px 8px;font-size:10px;background:#10b981" onclick="cambiarEstado(${x.id})">Estado</button></div>`;
     });
 }
 
-function renderCasesList(){
-    const l=document.getElementById('casesList');
-    if(cases.length===0){l.innerHTML='<p style="text-align:center;color:#999">Sin oficios</p>';return}
-    let h='';
-    cases.forEach(c=>{
-        const st='status-'+(c.estado||'Pendiente').replace(/\s/g,'-').toLowerCase();
-        h+=`<div class="case-card"><div class="case-title">${c.numero_legajo}</div><div style="font-size:12px;color:#6b7280;margin-bottom:8px">${c.causa}</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:11px;margin-bottom:8px"><div><b>F:</b> ${c.fiscalia}</div><div><b>T:</b> ${c.tecnico_principal||'-'}</div></div><div style="margin-bottom:8px"><span class="status-badge ${st}">${c.estado}</span></div><div style="display:flex;gap:6px"><button class="btn btn-primary" style="flex:1;font-size:10px;padding:6px" onclick="editCase(${c.id})">Editar</button><button class="btn" style="flex:1;background:#10b981;color:#fff;font-size:10px;padding:6px" onclick="editStatus(${c.id})">Estado</button></div></div>`;
+function filterTable(){
+    const s=(document.getElementById('search').value||'').toLowerCase();
+    const f=document.getElementById('filterState').value;
+    const t=document.getElementById('table');
+    t.innerHTML='';
+    const fil=data.filter(x=>{
+        const m=!s||x.numero_legajo.toLowerCase().includes(s);
+        const st=!f||x.estado===f;
+        return m&&st;
     });
-    l.innerHTML=h;
+    fil.forEach(x=>{
+        const col=x.estado==='Pendiente'?'badge-p':x.estado==='En Tramite'?'badge-t':'badge-f';
+        t.innerHTML+=`<tr><td>${x.numero_legajo}</td><td>${x.tecnico_principal||'-'}</td><td><span class="badge ${col}">${x.estado}</span></td><td><button class="btn" style="padding:3px 6px;font-size:10px" onclick="edit(${x.id})">E</button></td></tr>`;
+    });
 }
 
-async function saveCase(){
+async function save(){
+    const s=getSupa();
+    if(!s)return;
     const d={
-        numero_legajo:document.getElementById('caseNumber').value,
-        causa:document.getElementById('caseName').value,
-        fiscalia:document.getElementById('prosecutor').value,
-        fecha_recepcion:document.getElementById('receiveDate').value,
-        victima:document.getElementById('victim').value,
-        causante:document.getElementById('suspect').value,
-        dependencia:document.getElementById('department').value,
-        tecnico_principal:document.getElementById('mainTechnician').value,
-        estado:document.getElementById('status').value,
-        usuario_creador:currentUser.firstName,
+        numero_legajo:document.getElementById('legajo').value,
+        causa:document.getElementById('causa').value,
+        fiscalia:document.getElementById('fiscalia').value,
+        fecha_recepcion:document.getElementById('fecha').value,
+        victima:document.getElementById('victima').value,
+        causante:document.getElementById('causante').value,
+        dependencia:document.getElementById('division').value,
+        tecnico_principal:document.getElementById('tecnico').value,
+        estado:document.getElementById('estado').value,
+        usuario_creador:user.n,
         created_at:new Date().toISOString(),
         updated_at:new Date().toISOString()
     };
-    if(!supabase)return;
     try{
-        if(editingCaseId){
-            const{error}=await supabase.from('oficios').update(d).eq('id',editingCaseId);
-            if(error)throw error;
+        if(editing){
+            const{error:e}=await s.from('oficios').update(d).eq('id',editing);
+            if(e)throw e;
         }else{
-            const{error}=await supabase.from('oficios').insert([d]);
-            if(error)throw error;
+            const{error:e}=await s.from('oficios').insert([d]);
+            if(e)throw e;
         }
-        closeModal('newCaseModal');
-        resetForm();
-        await loadFromSupabase();
-        alert('Guardado');
-    }catch(err){
-        alert('Error: '+err.message);
+        closeModal('newModal');
+        editing=null;
+        await load();
+    }catch(e){
+        alert('Error: '+e.message);
     }
 }
 
-function editCase(id){
-    const c=cases.find(x=>x.id===id);
-    if(!c)return;
-    editingCaseId=id;
+function edit(id){
+    const x=data.find(i=>i.id===id);
+    if(!x)return;
+    editing=id;
     document.getElementById('modalTitle').textContent='Editar Oficio';
-    document.getElementById('caseNumber').value=c.numero_legajo||'';
-    document.getElementById('caseName').value=c.causa||'';
-    document.getElementById('prosecutor').value=c.fiscalia||'';
-    document.getElementById('receiveDate').value=c.fecha_recepcion||'';
-    document.getElementById('victim').value=c.victima||'';
-    document.getElementById('suspect').value=c.causante||'';
-    document.getElementById('department').value=c.dependencia||'';
-    document.getElementById('mainTechnician').value=c.tecnico_principal||'';
-    document.getElementById('status').value=c.estado||'';
-    openModal('newCaseModal');
+    document.getElementById('legajo').value=x.numero_legajo||'';
+    document.getElementById('causa').value=x.causa||'';
+    document.getElementById('fiscalia').value=x.fiscalia||'';
+    document.getElementById('fecha').value=x.fecha_recepcion||'';
+    document.getElementById('victima').value=x.victima||'';
+    document.getElementById('causante').value=x.causante||'';
+    document.getElementById('division').value=x.dependencia||'';
+    document.getElementById('tecnico').value=x.tecnico_principal||'';
+    document.getElementById('estado').value=x.estado||'';
+    openModal('newModal');
 }
 
-async function editStatus(id){
-    const c=cases.find(x=>x.id===id);
-    if(!c)return;
+async function cambiarEstado(id){
+    const x=data.find(i=>i.id===id);
+    if(!x)return;
     const e=['Pendiente','En Tramite','Finalizado'];
-    const i=e.indexOf(c.estado||'Pendiente');
+    const i=e.indexOf(x.estado||'Pendiente');
     const n=e[(i+1)%e.length];
-    if(!supabase)return;
+    const s=getSupa();
+    if(!s)return;
     try{
-        const{error}=await supabase.from('oficios').update({estado:n,updated_at:new Date().toISOString()}).eq('id',id);
-        if(error)throw error;
-        await loadFromSupabase();
+        const{error:err}=await s.from('oficios').update({estado:n,updated_at:new Date().toISOString()}).eq('id',id);
+        if(err)throw err;
+        await load();
     }catch(err){
         alert('Error: '+err.message);
     }
-}
-
-function resetForm(){
-    editingCaseId=null;
-    document.getElementById('modalTitle').textContent='Crear Oficio';
-    document.getElementById('caseNumber').value='';
-    document.getElementById('caseName').value='';
-    document.getElementById('prosecutor').value='';
-    document.getElementById('receiveDate').value='';
-    document.getElementById('victim').value='';
-    document.getElementById('suspect').value='';
-    document.getElementById('mainTechnician').value='';
-    document.getElementById('status').value='';
 }
 
 function openModal(id){document.getElementById(id).classList.add('active')}
-function closeModal(id){document.getElementById(id).classList.remove('active')}
-function switchSection(s,e){
+function closeModal(id){
+    document.getElementById(id).classList.remove('active');
+    if(!editing){
+        document.getElementById('modalTitle').textContent='Crear Oficio';
+        document.getElementById('legajo').value='';
+        document.getElementById('causa').value='';
+        document.getElementById('fiscalia').value='';
+        document.getElementById('fecha').value='';
+        document.getElementById('victima').value='';
+        document.getElementById('causante').value='';
+        document.getElementById('division').value='TELEMATICO';
+        document.getElementById('tecnico').value='';
+        document.getElementById('estado').value='Pendiente';
+    }
+}
+
+function showSection(s){
     document.querySelectorAll('.section').forEach(x=>x.classList.remove('active'));
     document.getElementById('section-'+s).classList.add('active');
-    document.querySelectorAll('.sidebar-item').forEach(x=>x.classList.remove('active'));
-    e.classList.add('active');
+    document.querySelectorAll('.menu-item').forEach(x=>x.classList.remove('active'));
+    event.target.classList.add('active');
 }
 
 document.querySelectorAll('.modal').forEach(m=>{
     m.addEventListener('click',e=>{
-        if(e.target===m)m.classList.remove('active');
+        if(e.target===m)closeModal(m.id);
     });
 });
 
-const u=JSON.parse(localStorage.getItem('sigolUser'));
-if(u){
-    currentUser=u;
-    document.getElementById('loginScreen').classList.add('hidden');
-    document.getElementById('dashboardScreen').classList.add('active');
-    document.getElementById('userFullName').textContent=u.firstName+' '+u.lastName;
-    document.getElementById('userPosition').textContent='Legajo #'+u.legajo;
-    setTimeout(loadFromSupabase,300);
+const su=JSON.parse(localStorage.getItem('su'));
+if(su){
+    user=su;
+    document.getElementById('loginScreen').style.display='none';
+    document.getElementById('dashboardScreen').style.display='block';
+    document.getElementById('userFullName').textContent=su.n+' '+su.a;
+    setTimeout(load,300);
 }
 </script>
 </body>
