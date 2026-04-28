@@ -2,108 +2,84 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#1a3a52">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SIGOL</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        html, body { height: 100%; width: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
-        body { background: #f5f7fa; }
-
-        #loginScreen { display: flex; align-items: center; justify-content: center; min-height: 100vh; background: linear-gradient(135deg, #0f172a 0%, #1a3a52 100%); padding: 20px; }
-        #loginScreen.hidden { display: none !important; }
-        .login-box { background: white; padding: 50px 30px; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); width: 100%; max-width: 420px; }
-        .login-header { text-align: center; margin-bottom: 40px; }
-        .login-logo { font-size: 52px; font-weight: 900; color: #1a3a52; margin-bottom: 12px; }
-        .login-subtitle { color: #9ca3af; font-size: 13px; text-transform: uppercase; letter-spacing: 2px; font-weight: 600; }
-        .form-group { margin-bottom: 20px; }
-        .form-label { display: block; font-size: 12px; font-weight: 700; color: #1a3a52; margin-bottom: 8px; text-transform: uppercase; }
-        input { width: 100%; padding: 14px; border: 1.5px solid #e5e7eb; border-radius: 10px; font-size: 15px; }
-        input:focus { outline: none; border-color: #0ea5e9; box-shadow: 0 0 0 3px rgba(14,165,233,0.1); }
-        .login-button { width: 100%; padding: 14px; background: linear-gradient(135deg, #1a3a52 0%, #2a4f6f 100%); color: white; border: none; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; text-transform: uppercase; margin-top: 10px; }
-        .error-msg { background: #fee; color: #c33; padding: 12px; border-radius: 8px; margin-bottom: 15px; display: none; border-left: 4px solid #f33; }
-        .error-msg.show { display: block; }
-
-        #dashboardScreen { display: none; height: 100vh; flex-direction: column; background: #f5f7fa; }
-        #dashboardScreen.active { display: flex; }
-
-        .dashboard-header { background: linear-gradient(135deg, #1a3a52 0%, #2a4f6f 100%); color: white; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
-        .header-title { font-size: 18px; font-weight: 800; }
-        .logout-button { background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: 600; }
-        .user-info { text-align: right; font-size: 10px; }
-
-        .main-container { display: flex; flex: 1; overflow: hidden; }
-        .sidebar { width: 260px; background: white; border-right: 1px solid #e5e7eb; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
-        .sidebar-item { padding: 12px 16px; cursor: pointer; font-size: 12px; color: #6b7280; border-radius: 8px; transition: all 0.2s; border-left: 3px solid transparent; }
-        .sidebar-item:hover { background: #f3f4f6; }
-        .sidebar-item.active { color: #0ea5e9; background: rgba(14,165,233,0.05); border-left-color: #0ea5e9; font-weight: 600; }
-
-        .main-area { flex: 1; overflow-y: auto; padding: 30px; }
-        .section { display: none; }
-        .section.active { display: block; }
-
-        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 30px; }
-        .stat-card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); border-top: 3px solid #0ea5e9; }
-        .stat-label { font-size: 10px; color: #6b7280; font-weight: 600; text-transform: uppercase; margin-bottom: 8px; }
-        .stat-number { font-size: 32px; font-weight: 800; color: #1a3a52; }
-
-        .search-box { background: white; padding: 16px; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); margin-bottom: 20px; }
-        .search-bar { width: 100%; padding: 10px; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 13px; margin-bottom: 10px; }
-        select { width: 100%; padding: 10px; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 13px; }
-        
-        .btn { padding: 10px 16px; border: none; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; text-transform: uppercase; display: inline-flex; align-items: center; gap: 6px; }
-        .btn-primary { background: linear-gradient(135deg, #1a3a52 0%, #2a4f6f 100%); color: white; }
-        .btn-secondary { background: #e5e7eb; color: #374151; }
-
-        .table-card { background: white; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); overflow: hidden; }
-        table { width: 100%; border-collapse: collapse; }
-        thead { background: linear-gradient(90deg, #f3f4f6 0%, #e5e7eb 100%); }
-        th { padding: 12px; text-align: left; font-weight: 700; color: #1a3a52; font-size: 11px; text-transform: uppercase; }
-        td { padding: 12px; border-bottom: 1px solid #e5e7eb; }
-
-        .status-badge { display: inline-block; padding: 4px 8px; border-radius: 12px; font-size: 10px; font-weight: 600; }
-        .status-pending { background: rgba(245,158,11,0.1); color: #b45309; }
-        .status-progress { background: rgba(59,130,246,0.1); color: #1e40af; }
-        .status-finished { background: rgba(16,185,129,0.1); color: #065f46; }
-
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; align-items: center; justify-content: center; }
-        .modal.active { display: flex; }
-        .modal-content { background: white; border-radius: 12px; max-height: 80vh; overflow-y: auto; width: 90%; max-width: 800px; }
-        .modal-header { padding: 20px; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; }
-        .modal-title { font-size: 18px; font-weight: 700; color: #1a3a52; }
-        .modal-close { background: none; border: none; font-size: 28px; color: #6b7280; cursor: pointer; }
-        .modal-body { padding: 20px; }
-        .modal-footer { padding: 20px; border-top: 1px solid #e5e7eb; display: flex; gap: 10px; justify-content: flex-end; }
-
-        .form-section { margin-bottom: 20px; }
-        .form-section-title { font-size: 12px; font-weight: 700; color: #1a3a52; text-transform: uppercase; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid #0ea5e9; }
-        .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-
-        .case-card { background: white; padding: 16px; border-radius: 10px; margin-bottom: 12px; border-left: 4px solid #0ea5e9; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
-        .case-title { font-size: 14px; font-weight: 700; color: #1a3a52; margin-bottom: 8px; }
-
-        @media (max-width: 767px) {
-            .sidebar { display: flex; flex-direction: row; width: 100%; height: auto; border-right: none; border-top: 1px solid #e5e7eb; padding: 0; order: 2; gap: 0; }
-            .sidebar-item { flex: 1; border-left: none; border-top: 3px solid transparent; border-radius: 0; padding: 12px; }
-            .sidebar-item.active { border-top-color: #0ea5e9; border-left: none; }
-            .main-container { flex-direction: column-reverse; }
-            .main-area { padding: 16px; }
-            .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-            .form-grid { grid-template-columns: 1fr; }
-            .modal-content { width: 95%; }
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f7fa}
+        #loginScreen{display:flex;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(135deg,#0f172a,#1a3a52);padding:20px}
+        #loginScreen.hidden{display:none}
+        .login-box{background:#fff;padding:50px 30px;border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,0.3);width:100%;max-width:420px}
+        .login-logo{font-size:52px;font-weight:900;color:#1a3a52;margin-bottom:12px;text-align:center}
+        .login-subtitle{color:#9ca3af;font-size:13px;text-transform:uppercase;letter-spacing:2px;text-align:center;margin-bottom:40px}
+        .form-group{margin-bottom:20px}
+        .form-label{display:block;font-size:12px;font-weight:700;color:#1a3a52;margin-bottom:8px;text-transform:uppercase}
+        input,select{width:100%;padding:14px;border:1.5px solid #e5e7eb;border-radius:10px;font-size:15px}
+        input:focus,select:focus{outline:0;border-color:#0ea5e9;box-shadow:0 0 0 3px rgba(14,165,233,0.1)}
+        .login-button{width:100%;padding:14px;background:linear-gradient(135deg,#1a3a52,#2a4f6f);color:#fff;border:0;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;text-transform:uppercase;margin-top:10px}
+        .error-msg{background:#fee;color:#c33;padding:12px;border-radius:8px;margin-bottom:15px;display:none;border-left:4px solid #f33}
+        .error-msg.show{display:block}
+        #dashboardScreen{display:none;height:100vh;flex-direction:column;background:#f5f7fa}
+        #dashboardScreen.active{display:flex}
+        .dashboard-header{background:linear-gradient(135deg,#1a3a52,#2a4f6f);color:#fff;padding:14px 16px;display:flex;justify-content:space-between;align-items:center}
+        .header-title{font-size:18px;font-weight:800}
+        .user-info{text-align:right;font-size:10px}
+        .logout-button{background:rgba(255,255,255,0.2);color:#fff;border:1px solid rgba(255,255,255,0.3);padding:5px 10px;border-radius:6px;cursor:pointer;font-size:10px;font-weight:600}
+        .main-container{display:flex;flex:1;overflow:hidden}
+        .sidebar{width:260px;background:#fff;border-right:1px solid #e5e7eb;padding:20px;overflow-y:auto;display:flex;flex-direction:column;gap:10px}
+        .sidebar-item{padding:12px 16px;cursor:pointer;font-size:12px;color:#6b7280;border-radius:8px;border-left:3px solid transparent;transition:all 0.2s}
+        .sidebar-item:hover{background:#f3f4f6}
+        .sidebar-item.active{color:#0ea5e9;background:rgba(14,165,233,0.05);border-left-color:#0ea5e9;font-weight:600}
+        .main-area{flex:1;overflow-y:auto;padding:30px}
+        .section{display:none}
+        .section.active{display:block}
+        .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:30px}
+        .stat-card{background:#fff;padding:20px;border-radius:10px;box-shadow:0 1px 3px rgba(0,0,0,0.08);border-top:3px solid #0ea5e9}
+        .stat-label{font-size:10px;color:#6b7280;font-weight:600;text-transform:uppercase;margin-bottom:8px}
+        .stat-number{font-size:32px;font-weight:800;color:#1a3a52}
+        .search-box{background:#fff;padding:16px;border-radius:10px;box-shadow:0 1px 3px rgba(0,0,0,0.08);margin-bottom:20px}
+        .search-bar{width:100%;padding:10px;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;margin-bottom:10px}
+        .btn{padding:10px 16px;border:0;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;text-transform:uppercase}
+        .btn-primary{background:linear-gradient(135deg,#1a3a52,#2a4f6f);color:#fff}
+        .btn-secondary{background:#e5e7eb;color:#374151}
+        table{width:100%;border-collapse:collapse;background:#fff;border-radius:10px;box-shadow:0 1px 3px rgba(0,0,0,0.08);overflow:hidden}
+        thead{background:linear-gradient(90deg,#f3f4f6,#e5e7eb)}
+        th{padding:12px;text-align:left;font-weight:700;color:#1a3a52;font-size:11px;text-transform:uppercase}
+        td{padding:12px;border-bottom:1px solid #e5e7eb}
+        .status-badge{display:inline-block;padding:4px 8px;border-radius:12px;font-size:10px;font-weight:600}
+        .status-pending{background:rgba(245,158,11,0.1);color:#b45309}
+        .status-progress{background:rgba(59,130,246,0.1);color:#1e40af}
+        .status-finished{background:rgba(16,185,129,0.1);color:#065f46}
+        .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:2000;align-items:center;justify-content:center}
+        .modal.active{display:flex}
+        .modal-content{background:#fff;border-radius:12px;max-height:80vh;overflow-y:auto;width:90%;max-width:800px}
+        .modal-header{padding:20px;border-bottom:1px solid #e5e7eb;display:flex;justify-content:space-between;align-items:center}
+        .modal-title{font-size:18px;font-weight:700;color:#1a3a52}
+        .modal-close{background:0;border:0;font-size:28px;color:#6b7280;cursor:pointer}
+        .modal-body{padding:20px}
+        .modal-footer{padding:20px;border-top:1px solid #e5e7eb;display:flex;gap:10px;justify-content:flex-end}
+        .form-section{margin-bottom:20px}
+        .form-section-title{font-size:12px;font-weight:700;color:#1a3a52;text-transform:uppercase;margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid #0ea5e9}
+        .form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+        .case-card{background:#fff;padding:16px;border-radius:10px;margin-bottom:12px;border-left:4px solid #0ea5e9;box-shadow:0 1px 3px rgba(0,0,0,0.08)}
+        .case-title{font-size:14px;font-weight:700;color:#1a3a52;margin-bottom:8px}
+        @media(max-width:767px){
+            .sidebar{width:100%;flex-direction:row;border-right:0;border-top:1px solid #e5e7eb;padding:0;order:2}
+            .sidebar-item{flex:1;border-left:0;border-top:3px solid transparent;border-radius:0;padding:12px}
+            .sidebar-item.active{border-top-color:#0ea5e9;border-left:0}
+            .main-container{flex-direction:column-reverse}
+            .main-area{padding:16px}
+            .stats-grid{grid-template-columns:repeat(2,1fr)}
+            .form-grid{grid-template-columns:1fr}
         }
     </style>
 </head>
 <body>
-
 <div id="loginScreen">
     <div class="login-box">
-        <div class="login-header">
-            <div class="login-logo">SIGOL</div>
-            <div class="login-subtitle">Sistema de Gestión de Oficios</div>
-        </div>
+        <div class="login-logo">SIGOL</div>
+        <div class="login-subtitle">Sistema de Gestion de Oficios</div>
         <div id="errorMsg" class="error-msg"></div>
         <div class="form-group">
             <label class="form-label">Nombre</label>
@@ -111,10 +87,10 @@
         </div>
         <div class="form-group">
             <label class="form-label">Apellido</label>
-            <input type="text" id="lastName" placeholder="García">
+            <input type="text" id="lastName" placeholder="Garcia">
         </div>
         <div class="form-group">
-            <label class="form-label">Número de Legajo</label>
+            <label class="form-label">Numero de Legajo</label>
             <input type="text" id="legajoNumber" placeholder="2847">
         </div>
         <div class="form-group">
@@ -128,73 +104,63 @@
 <div id="dashboardScreen">
     <div class="dashboard-header">
         <div class="header-title">SIGOL</div>
-        <div style="display: flex; align-items: center; gap: 12px;">
+        <div style="display:flex;align-items:center;gap:12px">
             <div class="user-info">
-                <div style="font-weight: 700;" id="userFullName">Usuario</div>
+                <div style="font-weight:700" id="userFullName">Usuario</div>
                 <div id="userPosition">Legajo</div>
             </div>
             <button class="logout-button" onclick="doLogout()">Cerrar</button>
         </div>
     </div>
-
     <div class="main-container">
         <div class="sidebar">
-            <div class="sidebar-item active" onclick="switchSection('dashboard', this)"><i class="fas fa-chart-line"></i> Panel</div>
-            <div class="sidebar-item" onclick="switchSection('new-case', this)"><i class="fas fa-plus-circle"></i> Nuevo</div>
-            <div class="sidebar-item" onclick="switchSection('cases', this)"><i class="fas fa-list"></i> Oficios</div>
-            <div class="sidebar-item" onclick="switchSection('contacts', this)"><i class="fas fa-envelope"></i> Contactos</div>
+            <div class="sidebar-item active" onclick="switchSection('dashboard',this)"><i class="fas fa-chart-line"></i> Panel</div>
+            <div class="sidebar-item" onclick="switchSection('new-case',this)"><i class="fas fa-plus-circle"></i> Nuevo</div>
+            <div class="sidebar-item" onclick="switchSection('cases',this)"><i class="fas fa-list"></i> Oficios</div>
+            <div class="sidebar-item" onclick="switchSection('contacts',this)"><i class="fas fa-envelope"></i> Contactos</div>
         </div>
-
         <div class="main-area">
             <div id="section-dashboard" class="section active">
                 <div class="stats-grid">
                     <div class="stat-card"><div class="stat-label">Total</div><div class="stat-number" id="totalCases">0</div></div>
                     <div class="stat-card"><div class="stat-label">Pendientes</div><div class="stat-number" id="countPending">0</div></div>
-                    <div class="stat-card"><div class="stat-label">En Trámite</div><div class="stat-number" id="countProgress">0</div></div>
+                    <div class="stat-card"><div class="stat-label">En Tramite</div><div class="stat-number" id="countProgress">0</div></div>
                     <div class="stat-card"><div class="stat-label">Finalizados</div><div class="stat-number" id="countFinished">0</div></div>
                 </div>
-
                 <div class="search-box">
                     <input type="text" class="search-bar" id="mainSearch" placeholder="Buscar por legajo..." onkeyup="filterCases()">
                     <select id="filterStatus" onchange="filterCases()">
                         <option value="">Todos los Estados</option>
                         <option value="Pendiente">Pendiente</option>
-                        <option value="En Trámite">En Trámite</option>
+                        <option value="En Tramite">En Tramite</option>
                         <option value="Finalizado">Finalizado</option>
                     </select>
                 </div>
-
-                <button class="btn btn-primary" onclick="openModal('newCaseModal')" style="margin-bottom: 20px;"><i class="fas fa-plus"></i> Nuevo Oficio</button>
-
-                <div class="table-card">
-                    <table>
-                        <thead><tr><th>Legajo</th><th>Técnico</th><th>Estado</th><th>Acciones</th></tr></thead>
-                        <tbody id="casesTable"><tr><td colspan="4" style="text-align:center;">Cargando...</td></tr></tbody>
-                    </table>
-                </div>
+                <button class="btn btn-primary" onclick="openModal('newCaseModal')" style="margin-bottom:20px"><i class="fas fa-plus"></i> Nuevo Oficio</button>
+                <table>
+                    <thead><tr><th>Legajo</th><th>Tecnico</th><th>Estado</th><th>Acciones</th></tr></thead>
+                    <tbody id="casesTable"><tr><td colspan="4" style="text-align:center">Cargando...</td></tr></tbody>
+                </table>
             </div>
-
             <div id="section-new-case" class="section">
-                <button class="btn btn-primary" onclick="openModal('newCaseModal')" style="width: 100%; padding: 16px;"><i class="fas fa-plus"></i> Crear Nuevo Oficio</button>
+                <button class="btn btn-primary" onclick="openModal('newCaseModal')" style="width:100%;padding:16px"><i class="fas fa-plus"></i> Crear Nuevo Oficio</button>
             </div>
-
             <div id="section-cases" class="section">
-                <h2 style="color:#1a3a52;margin-bottom:20px;">Oficios</h2>
+                <h2 style="color:#1a3a52;margin-bottom:20px">Oficios</h2>
                 <div id="casesList"></div>
             </div>
-
             <div id="section-contacts" class="section">
-                <h2 style="color:#1a3a52;margin-bottom:20px;">Contactos</h2>
-                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;">
+                <h2 style="color:#1a3a52;margin-bottom:20px">Contactos</h2>
+                <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px">
                     <div class="case-card">
-                        <div class="case-title">Delitos Telemáticos</div>
-                        <div style="font-size: 12px; margin-bottom: 12px;">divdtelematicos@outlook.com</div>
-                        <button class="btn btn-primary" style="font-size: 10px; padding: 6px 8px;" onclick="window.open('https://outlook.live.com')"><i class="fas fa-envelope"></i></button>
+                        <div class="case-title">Delitos Telematicos</div>
+                        <div style="font-size:12px;margin-bottom:12px">divdtelematicos@outlook.com</div>
+                        <button class="btn btn-primary" style="font-size:10px;padding:6px 8px" onclick="window.open('https://outlook.live.com')"><i class="fas fa-envelope"></i></button>
                     </div>
                     <div class="case-card">
-                        <div class="case-title">Laboratorio Fotográfico</div>
-                        <div style="font-size: 12px; margin-bottom: 12px;">laboratorio@outlook.com</div>
-                        <button class="btn btn-primary" style="font-size: 10px; padding: 6px 8px;" onclick="window.open('https://outlook.live.com')"><i class="fas fa-envelope"></i></button>
+                        <div class="case-title">Laboratorio Fotografico</div>
+                        <div style="font-size:12px;margin-bottom:12px">laboratorio@outlook.com</div>
+                        <button class="btn btn-primary" style="font-size:10px;padding:6px 8px" onclick="window.open('https://outlook.live.com')"><i class="fas fa-envelope"></i></button>
                     </div>
                 </div>
             </div>
@@ -210,27 +176,27 @@
         </div>
         <div class="modal-body">
             <div class="form-section">
-                <div class="form-section-title">Información</div>
+                <div class="form-section-title">Informacion</div>
                 <div class="form-grid">
                     <div class="form-group"><label class="form-label">Legajo</label><input type="text" id="caseNumber"></div>
                     <div class="form-group"><label class="form-label">Causa</label><input type="text" id="caseName"></div>
-                    <div class="form-group"><label class="form-label">Fiscalía</label><input type="text" id="prosecutor"></div>
+                    <div class="form-group"><label class="form-label">Fiscalia</label><input type="text" id="prosecutor"></div>
                     <div class="form-group"><label class="form-label">Fecha</label><input type="date" id="receiveDate"></div>
                 </div>
             </div>
             <div class="form-section">
                 <div class="form-section-title">Personas</div>
                 <div class="form-grid">
-                    <div class="form-group"><label class="form-label">Víctima</label><input type="text" id="victim"></div>
+                    <div class="form-group"><label class="form-label">Victima</label><input type="text" id="victim"></div>
                     <div class="form-group"><label class="form-label">Causante</label><input type="text" id="suspect"></div>
                 </div>
             </div>
             <div class="form-section">
-                <div class="form-section-title">Asignación</div>
+                <div class="form-section-title">Asignacion</div>
                 <div class="form-grid">
-                    <div class="form-group"><label class="form-label">División</label><select id="department"><option value="TELEMATICO">Delitos Telemáticos</option><option value="LABORATORIO">Laboratorio Fotográfico</option></select></div>
-                    <div class="form-group"><label class="form-label">Técnico</label><input type="text" id="mainTechnician"></div>
-                    <div class="form-group"><label class="form-label">Estado</label><select id="status"><option value="Pendiente">Pendiente</option><option value="En Trámite">En Trámite</option><option value="Finalizado">Finalizado</option></select></div>
+                    <div class="form-group"><label class="form-label">Division</label><select id="department"><option value="TELEMATICO">Delitos Telematicos</option><option value="LABORATORIO">Laboratorio Fotografico</option></select></div>
+                    <div class="form-group"><label class="form-label">Tecnico</label><input type="text" id="mainTechnician"></div>
+                    <div class="form-group"><label class="form-label">Estado</label><select id="status"><option value="Pendiente">Pendiente</option><option value="En Tramite">En Tramite</option><option value="Finalizado">Finalizado</option></select></div>
                 </div>
             </div>
         </div>
@@ -243,237 +209,202 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const SUPABASE_URL = 'https://gmbhptqijgrlxosfskva.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdtYmhwdHFpamdybHhvc2Zza3ZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwNjIyNTAsImV4cCI6MjA5MjYzODI1MH0.FQRwIjvLeXUaNM_Vx2R2KLuYJyWgNrjmuP85QTdRBLY';
-const PASSWORD = '3813';
-
+const SUPABASE_URL='https://gmbhptqijgrlxosfskva.supabase.co';
+const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdtYmhwdHFpamdybHhvc2Zza3ZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwNjIyNTAsImV4cCI6MjA5MjYzODI1MH0.FQRwIjvLeXUaNM_Vx2R2KLuYJyWgNrjmuP85QTdRBLY';
+const PASSWORD='3813';
 let supabase;
-let currentUser = null;
-let cases = [];
-let editingCaseId = null;
+let currentUser=null;
+let cases=[];
+let editingCaseId=null;
 
-setTimeout(function() {
-    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-}, 100);
+function initSupabase(){
+    if(!window.supabase)return setTimeout(initSupabase,100);
+    supabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+}
+initSupabase();
 
-function doLogin() {
-    const firstName = document.getElementById('firstName').value.trim();
-    const lastName = document.getElementById('lastName').value.trim();
-    const legajo = document.getElementById('legajoNumber').value.trim();
-    const pass = document.getElementById('password').value;
-    const error = document.getElementById('errorMsg');
-    error.classList.remove('show');
-
-    if (!firstName || !lastName || !legajo || !pass) {
-        error.textContent = 'Completa todos los campos';
-        error.classList.add('show');
-        return;
-    }
-    if (pass !== PASSWORD) {
-        error.textContent = 'Clave incorrecta';
-        error.classList.add('show');
-        return;
-    }
-    if (!/^\d+$/.test(legajo)) {
-        error.textContent = 'Legajo debe ser numeros';
-        error.classList.add('show');
-        return;
-    }
-
-    currentUser = { firstName, lastName, legajo };
-    localStorage.setItem('sigolUser', JSON.stringify(currentUser));
+function doLogin(){
+    const f=document.getElementById('firstName').value.trim();
+    const l=document.getElementById('lastName').value.trim();
+    const leg=document.getElementById('legajoNumber').value.trim();
+    const p=document.getElementById('password').value;
+    const e=document.getElementById('errorMsg');
+    e.classList.remove('show');
+    if(!f||!l||!leg||!p){e.textContent='Completa todos';e.classList.add('show');return}
+    if(p!==PASSWORD){e.textContent='Clave incorrecta';e.classList.add('show');return}
+    if(!/^\d+$/.test(leg)){e.textContent='Legajo numeros';e.classList.add('show');return}
+    currentUser={firstName:f,lastName:l,legajo:leg};
+    localStorage.setItem('sigolUser',JSON.stringify(currentUser));
     document.getElementById('loginScreen').classList.add('hidden');
     document.getElementById('dashboardScreen').classList.add('active');
-    document.getElementById('userFullName').textContent = firstName + ' ' + lastName;
-    document.getElementById('userPosition').textContent = 'Legajo #' + legajo;
+    document.getElementById('userFullName').textContent=f+' '+l;
+    document.getElementById('userPosition').textContent='Legajo #'+leg;
     loadFromSupabase();
 }
 
-function doLogout() {
-    if (confirm('Cerrar sesion?')) {
-        currentUser = null;
+function doLogout(){
+    if(confirm('Cerrar?')){
+        currentUser=null;
         localStorage.removeItem('sigolUser');
         document.getElementById('dashboardScreen').classList.remove('active');
         document.getElementById('loginScreen').classList.remove('hidden');
     }
 }
 
-async function loadFromSupabase() {
-    try {
-        const { data, error } = await supabase.from('oficios').select('*').order('id', { ascending: false });
-        if (error) throw error;
-        cases = data || [];
+async function loadFromSupabase(){
+    if(!supabase)return;
+    try{
+        const{data,error}=await supabase.from('oficios').select('*').order('id',{ascending:false});
+        if(error)throw error;
+        cases=data||[];
         updateStats();
         renderTable();
         renderCasesList();
-    } catch (err) {
-        console.error('Error:', err);
+    }catch(err){
+        console.log('Error:',err);
     }
 }
 
-function updateStats() {
-    document.getElementById('totalCases').textContent = cases.length;
-    document.getElementById('countPending').textContent = cases.filter(c => c.estado === 'Pendiente').length;
-    document.getElementById('countProgress').textContent = cases.filter(c => c.estado === 'En Trámite').length;
-    document.getElementById('countFinished').textContent = cases.filter(c => c.estado === 'Finalizado').length;
+function updateStats(){
+    document.getElementById('totalCases').textContent=cases.length;
+    document.getElementById('countPending').textContent=cases.filter(c=>c.estado==='Pendiente').length;
+    document.getElementById('countProgress').textContent=cases.filter(c=>c.estado==='En Tramite').length;
+    document.getElementById('countFinished').textContent=cases.filter(c=>c.estado==='Finalizado').length;
 }
 
-function filterCases() {
-    renderTable();
-}
+function filterCases(){renderTable()}
 
-function renderTable() {
-    const search = (document.getElementById('mainSearch')?.value || '').toLowerCase();
-    const statusFilter = document.getElementById('filterStatus')?.value || '';
-    const filtered = cases.filter(c => {
-        const m = !search || c.numero_legajo?.toLowerCase().includes(search);
-        const s = !statusFilter || c.estado === statusFilter;
-        return m && s;
+function renderTable(){
+    const s=(document.getElementById('mainSearch')?.value||'').toLowerCase();
+    const st=document.getElementById('filterStatus')?.value||'';
+    const f=cases.filter(c=>{
+        const m=!s||c.numero_legajo?.toLowerCase().includes(s);
+        const ss=!st||c.estado===st;
+        return m&&ss;
     });
-
-    const tbody = document.getElementById('casesTable');
-    tbody.innerHTML = '';
-    if (filtered.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Sin oficios</td></tr>';
-        return;
-    }
-
-    filtered.forEach(c => {
-        const st = 'status-' + (c.estado || 'Pendiente').replace(/\s/g, '-').toLowerCase();
-        tbody.innerHTML += `<tr>
-            <td>${c.numero_legajo}</td>
-            <td>${c.tecnico_principal || '-'}</td>
-            <td><span class="status-badge ${st}">${c.estado}</span></td>
-            <td><button onclick="editCase(${c.id})" class="btn" style="background:#0ea5e9;color:white;padding:4px 8px;font-size:10px;">Editar</button> <button onclick="editStatus(${c.id})" class="btn" style="background:#10b981;color:white;padding:4px 8px;font-size:10px;">Estado</button></td>
-        </tr>`;
+    const t=document.getElementById('casesTable');
+    t.innerHTML='';
+    if(f.length===0){t.innerHTML='<tr><td colspan="4">Sin oficios</td></tr>';return}
+    f.forEach(c=>{
+        const st='status-'+(c.estado||'Pendiente').replace(/\s/g,'-').toLowerCase();
+        t.innerHTML+=`<tr><td>${c.numero_legajo}</td><td>${c.tecnico_principal||'-'}</td><td><span class="status-badge ${st}">${c.estado}</span></td><td><button onclick="editCase(${c.id})" class="btn" style="background:#0ea5e9;color:#fff;padding:4px 8px;font-size:10px">E</button> <button onclick="editStatus(${c.id})" class="btn" style="background:#10b981;color:#fff;padding:4px 8px;font-size:10px">S</button></td></tr>`;
     });
 }
 
-function renderCasesList() {
-    const casesList = document.getElementById('casesList');
-    if (cases.length === 0) {
-        casesList.innerHTML = '<p style="text-align:center;color:#999;">Sin oficios</p>';
-        return;
-    }
-
-    let html = '';
-    cases.forEach(c => {
-        const st = 'status-' + (c.estado || 'Pendiente').replace(/\s/g, '-').toLowerCase();
-        html += `<div class="case-card"><div class="case-title">${c.numero_legajo}</div><div style="font-size:12px;color:#6b7280;margin-bottom:8px;">${c.causa}</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:11px;margin-bottom:8px;"><div><strong>Fiscalia:</strong> ${c.fiscalia}</div><div><strong>Tecnico:</strong> ${c.tecnico_principal || '-'}</div></div><div style="margin-bottom:8px;"><span class="status-badge ${st}">${c.estado}</span></div><div style="display:flex;gap:6px;"><button class="btn btn-primary" style="flex:1;font-size:10px;padding:6px;" onclick="editCase(${c.id})">Editar</button><button class="btn" style="flex:1;background:#10b981;color:white;font-size:10px;padding:6px;" onclick="editStatus(${c.id})">Estado</button></div></div>`;
+function renderCasesList(){
+    const l=document.getElementById('casesList');
+    if(cases.length===0){l.innerHTML='<p style="text-align:center;color:#999">Sin oficios</p>';return}
+    let h='';
+    cases.forEach(c=>{
+        const st='status-'+(c.estado||'Pendiente').replace(/\s/g,'-').toLowerCase();
+        h+=`<div class="case-card"><div class="case-title">${c.numero_legajo}</div><div style="font-size:12px;color:#6b7280;margin-bottom:8px">${c.causa}</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:11px;margin-bottom:8px"><div><b>F:</b> ${c.fiscalia}</div><div><b>T:</b> ${c.tecnico_principal||'-'}</div></div><div style="margin-bottom:8px"><span class="status-badge ${st}">${c.estado}</span></div><div style="display:flex;gap:6px"><button class="btn btn-primary" style="flex:1;font-size:10px;padding:6px" onclick="editCase(${c.id})">Editar</button><button class="btn" style="flex:1;background:#10b981;color:#fff;font-size:10px;padding:6px" onclick="editStatus(${c.id})">Estado</button></div></div>`;
     });
-    casesList.innerHTML = html;
+    l.innerHTML=h;
 }
 
-async function saveCase() {
-    const data = {
-        numero_legajo: document.getElementById('caseNumber').value,
-        causa: document.getElementById('caseName').value,
-        fiscalia: document.getElementById('prosecutor').value,
-        fecha_recepcion: document.getElementById('receiveDate').value,
-        victima: document.getElementById('victim').value,
-        causante: document.getElementById('suspect').value,
-        dependencia: document.getElementById('department').value,
-        tecnico_principal: document.getElementById('mainTechnician').value,
-        estado: document.getElementById('status').value,
-        usuario_creador: currentUser.firstName,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+async function saveCase(){
+    const d={
+        numero_legajo:document.getElementById('caseNumber').value,
+        causa:document.getElementById('caseName').value,
+        fiscalia:document.getElementById('prosecutor').value,
+        fecha_recepcion:document.getElementById('receiveDate').value,
+        victima:document.getElementById('victim').value,
+        causante:document.getElementById('suspect').value,
+        dependencia:document.getElementById('department').value,
+        tecnico_principal:document.getElementById('mainTechnician').value,
+        estado:document.getElementById('status').value,
+        usuario_creador:currentUser.firstName,
+        created_at:new Date().toISOString(),
+        updated_at:new Date().toISOString()
     };
-
-    try {
-        if (editingCaseId) {
-            const { error } = await supabase.from('oficios').update(data).eq('id', editingCaseId);
-            if (error) throw error;
-        } else {
-            const { error } = await supabase.from('oficios').insert([data]);
-            if (error) throw error;
+    if(!supabase)return;
+    try{
+        if(editingCaseId){
+            const{error}=await supabase.from('oficios').update(d).eq('id',editingCaseId);
+            if(error)throw error;
+        }else{
+            const{error}=await supabase.from('oficios').insert([d]);
+            if(error)throw error;
         }
-
         closeModal('newCaseModal');
         resetForm();
         await loadFromSupabase();
-        alert('Guardado en la nube');
-    } catch (err) {
-        alert('Error: ' + err.message);
+        alert('Guardado');
+    }catch(err){
+        alert('Error: '+err.message);
     }
 }
 
-function editCase(caseId) {
-    const caseItem = cases.find(c => c.id === caseId);
-    if (!caseItem) return;
-
-    editingCaseId = caseId;
-    document.getElementById('modalTitle').textContent = 'Editar Oficio';
-    document.getElementById('caseNumber').value = caseItem.numero_legajo || '';
-    document.getElementById('caseName').value = caseItem.causa || '';
-    document.getElementById('prosecutor').value = caseItem.fiscalia || '';
-    document.getElementById('receiveDate').value = caseItem.fecha_recepcion || '';
-    document.getElementById('victim').value = caseItem.victima || '';
-    document.getElementById('suspect').value = caseItem.causante || '';
-    document.getElementById('department').value = caseItem.dependencia || '';
-    document.getElementById('mainTechnician').value = caseItem.tecnico_principal || '';
-    document.getElementById('status').value = caseItem.estado || '';
-
+function editCase(id){
+    const c=cases.find(x=>x.id===id);
+    if(!c)return;
+    editingCaseId=id;
+    document.getElementById('modalTitle').textContent='Editar Oficio';
+    document.getElementById('caseNumber').value=c.numero_legajo||'';
+    document.getElementById('caseName').value=c.causa||'';
+    document.getElementById('prosecutor').value=c.fiscalia||'';
+    document.getElementById('receiveDate').value=c.fecha_recepcion||'';
+    document.getElementById('victim').value=c.victima||'';
+    document.getElementById('suspect').value=c.causante||'';
+    document.getElementById('department').value=c.dependencia||'';
+    document.getElementById('mainTechnician').value=c.tecnico_principal||'';
+    document.getElementById('status').value=c.estado||'';
     openModal('newCaseModal');
 }
 
-async function editStatus(caseId) {
-    const caseItem = cases.find(c => c.id === caseId);
-    if (!caseItem) return;
-
-    const estados = ['Pendiente', 'En Trámite', 'Finalizado'];
-    const currentIndex = estados.indexOf(caseItem.estado || 'Pendiente');
-    const nextIndex = (currentIndex + 1) % estados.length;
-    const newStatus = estados[nextIndex];
-
-    try {
-        const { error } = await supabase.from('oficios').update({ estado: newStatus, updated_at: new Date().toISOString() }).eq('id', caseId);
-        if (error) throw error;
+async function editStatus(id){
+    const c=cases.find(x=>x.id===id);
+    if(!c)return;
+    const e=['Pendiente','En Tramite','Finalizado'];
+    const i=e.indexOf(c.estado||'Pendiente');
+    const n=e[(i+1)%e.length];
+    if(!supabase)return;
+    try{
+        const{error}=await supabase.from('oficios').update({estado:n,updated_at:new Date().toISOString()}).eq('id',id);
+        if(error)throw error;
         await loadFromSupabase();
-        alert('Estado: ' + newStatus);
-    } catch (err) {
-        alert('Error: ' + err.message);
+    }catch(err){
+        alert('Error: '+err.message);
     }
 }
 
-function resetForm() {
-    editingCaseId = null;
-    document.getElementById('modalTitle').textContent = 'Crear Oficio';
-    document.getElementById('caseNumber').value = '';
-    document.getElementById('caseName').value = '';
-    document.getElementById('prosecutor').value = '';
-    document.getElementById('receiveDate').value = '';
-    document.getElementById('victim').value = '';
-    document.getElementById('suspect').value = '';
-    document.getElementById('mainTechnician').value = '';
-    document.getElementById('status').value = '';
+function resetForm(){
+    editingCaseId=null;
+    document.getElementById('modalTitle').textContent='Crear Oficio';
+    document.getElementById('caseNumber').value='';
+    document.getElementById('caseName').value='';
+    document.getElementById('prosecutor').value='';
+    document.getElementById('receiveDate').value='';
+    document.getElementById('victim').value='';
+    document.getElementById('suspect').value='';
+    document.getElementById('mainTechnician').value='';
+    document.getElementById('status').value='';
 }
 
-function openModal(id) { document.getElementById(id).classList.add('active'); }
-function closeModal(id) { document.getElementById(id).classList.remove('active'); }
-function switchSection(section, el) {
-    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-    document.getElementById('section-' + section).classList.add('active');
-    document.querySelectorAll('.sidebar-item').forEach(s => s.classList.remove('active'));
-    el.classList.add('active');
+function openModal(id){document.getElementById(id).classList.add('active')}
+function closeModal(id){document.getElementById(id).classList.remove('active')}
+function switchSection(s,e){
+    document.querySelectorAll('.section').forEach(x=>x.classList.remove('active'));
+    document.getElementById('section-'+s).classList.add('active');
+    document.querySelectorAll('.sidebar-item').forEach(x=>x.classList.remove('active'));
+    e.classList.add('active');
 }
 
-document.querySelectorAll('.modal').forEach(m => {
-    m.addEventListener('click', (e) => {
-        if (e.target === m) m.classList.remove('active');
+document.querySelectorAll('.modal').forEach(m=>{
+    m.addEventListener('click',e=>{
+        if(e.target===m)m.classList.remove('active');
     });
 });
 
-if (JSON.parse(localStorage.getItem('sigolUser'))) {
-    const u = JSON.parse(localStorage.getItem('sigolUser'));
-    currentUser = u;
+const u=JSON.parse(localStorage.getItem('sigolUser'));
+if(u){
+    currentUser=u;
     document.getElementById('loginScreen').classList.add('hidden');
     document.getElementById('dashboardScreen').classList.add('active');
-    document.getElementById('userFullName').textContent = u.firstName + ' ' + u.lastName;
-    document.getElementById('userPosition').textContent = 'Legajo #' + u.legajo;
-    setTimeout(loadFromSupabase, 200);
+    document.getElementById('userFullName').textContent=u.firstName+' '+u.lastName;
+    document.getElementById('userPosition').textContent='Legajo #'+u.legajo;
+    setTimeout(loadFromSupabase,300);
 }
 </script>
-
 </body>
 </html>
