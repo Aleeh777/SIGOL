@@ -478,27 +478,44 @@ async function renderSavedFiles(){
     const s=getSupa();
     if(!s||!editing)return;
     
-    const x=data.find(i=>String(i.id)===String(editing));
-    if(!x||!x.archivos){
-        document.getElementById('savedFileList').innerHTML='<p style="color:#999;font-size:11px">No hay archivos guardados</p>';
-        return;
+    try{
+        const x=data.find(i=>String(i.id)===String(editing));
+        if(!x||!x.archivos||x.archivos.trim()===''||x.archivos==='EMPTY'){
+            document.getElementById('savedFileList').innerHTML='<p style="color:#999;font-size:11px">No hay archivos guardados</p>';
+            return;
+        }
+        
+        // Intenta listar archivos del Storage por legajo
+        let html='';
+        try{
+            const{data:files,error}=await s.storage.from('oficios-archivos').list(x.numero_legajo);
+            if(!error&&files&&files.length>0){
+                files.forEach(file=>{
+                    if(file.name!=='.emptyFolderPlaceholder'){
+                        const filePath=`${x.numero_legajo}/${file.name}`;
+                        html+=`<div class="file-item saved">
+                            <span><i class="fas fa-file-pdf"></i> ${file.name}</span>
+                            <div>
+                                <button class="btn-download" onclick="downloadFile('${filePath}')">Descargar</button>
+                                <button class="btn-delete" onclick="deleteFile('${filePath}','${editing}')">Eliminar</button>
+                            </div>
+                        </div>`;
+                    }
+                });
+            }
+        }catch(e){
+            console.log('No hay bucket oficios-archivos, intentando parsear archivos guardados...');
+        }
+        
+        if(html===''){
+            document.getElementById('savedFileList').innerHTML='<p style="color:#999;font-size:11px">No hay archivos guardados</p>';
+        }else{
+            document.getElementById('savedFileList').innerHTML=html;
+        }
+    }catch(e){
+        console.error('Error:', e);
+        document.getElementById('savedFileList').innerHTML='<p style="color:#999;font-size:11px">Error al cargar archivos</p>';
     }
-    
-    const paths=x.archivos.split('|').filter(p=>p);
-    let html='';
-    
-    for(const path of paths){
-        const filename=path.split('/').pop();
-        html+=`<div class="file-item saved">
-            <span><i class="fas fa-file-pdf"></i> ${filename}</span>
-            <div>
-                <button class="btn-download" onclick="downloadFile('${path}')">Descargar</button>
-                <button class="btn-delete" onclick="deleteFile('${path}','${editing}')">Eliminar</button>
-            </div>
-        </div>`;
-    }
-    
-    document.getElementById('savedFileList').innerHTML=html;
 }
 
 async function downloadFile(path){
@@ -507,7 +524,7 @@ async function downloadFile(path){
     
     try{
         const filename=path.split('/').pop();
-        const{data:url,error}=await s.storage.from('oficios-archivos').createSignedUrl(path,3600);
+        const{data:url,error}=await s.storage.from('archivos').createSignedUrl(path,3600);
         if(error)throw error;
         
         const a=document.createElement('a');
@@ -526,7 +543,7 @@ async function deleteFile(path,ofidioId){
     if(!s)return;
     
     try{
-        const{error}=await s.storage.from('oficios-archivos').remove([path]);
+        const{error}=await s.storage.from('archivos').remove([path]);
         if(error)throw error;
         
         const x=data.find(i=>String(i.id)===String(ofidioId));
