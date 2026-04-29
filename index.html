@@ -485,26 +485,26 @@ async function renderSavedFiles(){
             return;
         }
         
-        // Intenta listar archivos del Storage por legajo
         let html='';
-        try{
-            const{data:files,error}=await s.storage.from('oficios-archivos').list(x.numero_legajo);
-            if(!error&&files&&files.length>0){
-                files.forEach(file=>{
-                    if(file.name!=='.emptyFolderPlaceholder'){
-                        const filePath=`${x.numero_legajo}/${file.name}`;
-                        html+=`<div class="file-item saved">
-                            <span><i class="fas fa-file-pdf"></i> ${file.name}</span>
-                            <div>
-                                <button class="btn-download" onclick="downloadFile('${filePath}')">Descargar</button>
-                                <button class="btn-delete" onclick="deleteFile('${filePath}','${editing}')">Eliminar</button>
-                            </div>
-                        </div>`;
-                    }
-                });
-            }
-        }catch(e){
-            console.log('No hay bucket oficios-archivos, intentando parsear archivos guardados...');
+        
+        // Parsear los paths guardados en la columna archivos
+        const archivosGuardados=x.archivos.split('/').filter(p=>p&&p!=='EMPTY');
+        
+        if(archivosGuardados.length===0){
+            document.getElementById('savedFileList').innerHTML='<p style="color:#999;font-size:11px">No hay archivos guardados</p>';
+            return;
+        }
+        
+        // El último elemento es el nombre del archivo
+        for(const archivo of archivosGuardados){
+            const filename=archivo.split('-').pop()||archivo; // Extrae el nombre después del último guión
+            html+=`<div class="file-item saved">
+                <span><i class="fas fa-file-pdf"></i> ${filename}</span>
+                <div>
+                    <button class="btn-download" onclick="downloadFile('${x.numero_legajo}/${archivo}')">Descargar</button>
+                    <button class="btn-delete" onclick="deleteFile('${x.numero_legajo}/${archivo}','${editing}')">Eliminar</button>
+                </div>
+            </div>`;
         }
         
         if(html===''){
