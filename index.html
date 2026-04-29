@@ -304,7 +304,7 @@ async function load(){
     const s=getSupa();
     if(!s)return setTimeout(load,200);
     try{
-        const{data:d,error:e}=await s.from('oficios').select('*').order('id',{ascending:false});
+        const{data:d,error:e}=await s.from('oficios').select('*').order('created_at',{ascending:false});
         if(e)throw e;
         data=d||[];
         render();
