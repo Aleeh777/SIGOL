@@ -266,7 +266,7 @@ function removeFile(i){
     renderFiles();
 }
 
-function login(){
+async function login(){
     const f=document.getElementById('firstName').value.trim();
     const l=document.getElementById('lastName').value.trim();
     const leg=document.getElementById('legajoNumber').value.trim();
@@ -295,7 +295,7 @@ function login(){
     document.getElementById('loginScreen').style.display='none';
     document.getElementById('dashboardScreen').style.display='block';
     document.getElementById('userFullName').textContent=f+' '+l;
-    load();
+    await load();
 }
 
 function logout(){
