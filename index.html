@@ -3,619 +3,467 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SIGOL</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>SIGOL - Sistema de Gestión de Oficios</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         *{margin:0;padding:0;box-sizing:border-box}
-        body{font-family:Arial,sans-serif;background:#f5f7fa}
-        #loginScreen{display:flex;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(135deg,#0f172a,#1a3a52)}
-        .login-box{background:#fff;padding:50px;border-radius:10px;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
-        .login-logo{font-size:48px;font-weight:900;color:#1a3a52;text-align:center;margin-bottom:10px}
-        .login-sub{text-align:center;color:#999;font-size:12px;margin-bottom:40px}
-        .form-group{margin-bottom:20px}
-        label{display:block;color:#1a3a52;font-weight:bold;font-size:12px;margin-bottom:5px}
-        input{width:100%;padding:12px;border:1px solid #ddd;border-radius:5px;font-size:14px}
-        button{width:100%;padding:12px;background:#1a3a52;color:#fff;border:none;border-radius:5px;font-weight:bold;cursor:pointer;font-size:14px}
-        button:active{transform:scale(0.98)}
-        .error{background:#fee;color:#c33;padding:10px;border-radius:5px;margin-bottom:15px;display:none;font-size:12px}
-        #dashboardScreen{display:none}
-        .header{background:#1a3a52;color:#fff;padding:15px;display:flex;justify-content:space-between;align-items:center}
-        .container{display:flex;height:calc(100vh-50px)}
-        .sidebar{width:250px;background:#fff;padding:20px;border-right:1px solid #ddd;overflow-y:auto}
-        .menu-item{padding:10px;margin:5px 0;cursor:pointer;border-radius:5px;font-size:12px;display:flex;align-items:center;gap:8px}
-        .menu-item.active{background:#0ea5e9;color:#fff;font-weight:bold}
-        .content{flex:1;padding:20px;overflow-y:auto}
-        .section{display:none}
-        .section.active{display:block}
+        body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:#f5f5f5;color:#333}
+        .header{background:#0d3d56;color:#fff;padding:15px;display:flex;justify-content:space-between;align-items:center}
+        .header h1{font-size:20px}
+        .header .user{text-align:right}
+        .header a{color:#0ea5e9;cursor:pointer;text-decoration:none}
+        .container{display:flex;height:calc(100vh - 60px)}
+        .sidebar{width:200px;background:#1a4d61;color:#fff;padding:15px;overflow-y:auto}
+        .sidebar-item{padding:12px;margin:5px 0;border-radius:5px;cursor:pointer;background:#0d3d56}
+        .sidebar-item.active{background:#0ea5e9;font-weight:bold}
+        .main{flex:1;padding:20px;overflow-y:auto}
+        .card{background:#fff;padding:20px;border-radius:8px;box-shadow:0 2px 4px rgba(0,0,0,0.1);margin-bottom:20px}
+        .btn{background:#0ea5e9;color:#fff;padding:10px 15px;border:none;border-radius:5px;cursor:pointer;font-size:14px;font-weight:bold}
+        .btn:hover{background:#0d97cc}
+        .btn-danger{background:#ef4444}
+        .btn-danger:hover{background:#dc2626}
+        .btn-success{background:#10b981}
+        .btn-success:hover{background:#059669}
+        table{width:100%;border-collapse:collapse;margin-top:15px}
+        table th,table td{padding:12px;text-align:left;border-bottom:1px solid #ddd}
+        table th{background:#f0f0f0;font-weight:bold}
+        table tr:hover{background:#f9f9f9}
+        .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:1000}
+        .modal.active{display:flex;justify-content:center;align-items:center}
+        .modal-content{background:#fff;padding:30px;border-radius:10px;width:90%;max-width:600px;max-height:90vh;overflow-y:auto}
+        .modal-close{float:right;font-size:28px;cursor:pointer;color:#999}
+        .form-group{margin-bottom:15px}
+        .form-group label{display:block;font-weight:bold;margin-bottom:5px}
+        .form-group input,.form-group select,.form-group textarea{width:100%;padding:10px;border:1px solid #ddd;border-radius:5px;font-family:inherit}
         .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;margin-bottom:20px}
-        .stat{background:#fff;padding:15px;border-radius:5px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,0.1);border-top:3px solid #0ea5e9}
-        .stat-num{font-size:32px;font-weight:bold;color:#1a3a52}
-        .stat-label{font-size:11px;color:#999}
-        table{width:100%;border-collapse:collapse;background:#fff;border-radius:5px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.1)}
-        th{background:#f5f5f5;padding:10px;text-align:left;font-weight:bold;font-size:12px}
-        td{padding:10px;border-bottom:1px solid #eee}
-        .badge{display:inline-block;padding:3px 6px;border-radius:3px;font-size:10px;font-weight:bold}
-        .badge-p{background:#fff3cd;color:#856404}
-        .badge-t{background:#cfe2ff;color:#084298}
-        .badge-f{background:#d1e7dd;color:#0f5132}
-        .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center}
-        .modal.active{display:flex}
-        .modal-box{background:#fff;width:90%;max-width:700px;border-radius:10px;max-height:80vh;overflow-y:auto}
-        .modal-header{padding:15px;border-bottom:1px solid #ddd;font-weight:bold;font-size:16px;display:flex;justify-content:space-between}
-        .modal-close{cursor:pointer;font-size:20px;background:none;border:none;color:#999}
-        .modal-body{padding:15px}
-        .modal-footer{padding:15px;border-top:1px solid #ddd;display:flex;gap:10px;justify-content:flex-end}
-        .form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
-        .form-section{margin-bottom:15px;padding-bottom:15px;border-bottom:1px solid #eee}
-        .search-box{background:#fff;padding:15px;border-radius:5px;margin-bottom:15px;box-shadow:0 1px 3px rgba(0,0,0,0.1)}
-        .btn{padding:8px 12px;background:#1a3a52;color:#fff;border:none;border-radius:5px;cursor:pointer;font-size:12px;font-weight:bold}
-        .btn-sec{background:#ddd;color:#333}
-        .file-upload{border:2px dashed #0ea5e9;border-radius:5px;padding:15px;text-align:center;cursor:pointer;background:#f0f9ff;margin-bottom:10px}
-        .file-upload:hover{background:#e0f2fe}
-        .file-list{margin-top:10px}
-        .file-item{background:#f0fdf4;padding:8px;border-radius:5px;margin-bottom:5px;border-left:4px solid #10b981;display:flex;justify-content:space-between;align-items:center;font-size:11px}
-        .file-item.saved{background:#f0f9ff;border-left-color:#0ea5e9}
-        .btn-download{background:#10b981;color:#fff;padding:4px 8px;border-radius:3px;border:none;cursor:pointer;font-size:10px;font-weight:bold}
-        .btn-download:hover{background:#059669}
-        .btn-delete{background:#ef4444;color:#fff;padding:4px 8px;border-radius:3px;border:none;cursor:pointer;font-size:10px;font-weight:bold}
-        .btn-delete:hover{background:#dc2626}
-        .contact-box{background:#fff;padding:15px;border-radius:5px;box-shadow:0 1px 3px rgba(0,0,0,0.1)}
-        .contact-title{font-weight:bold;margin-bottom:5px}
-        .contact-email{font-size:12px;color:#0ea5e9;margin-bottom:10px}
-        .btn-group{display:flex;gap:5px}
-        .btn-sm{padding:5px 8px;font-size:11px}
-        @media(max-width:768px){
-            .sidebar{width:100%;flex-direction:row;display:grid;grid-template-columns:repeat(4,1fr);gap:5px;padding:10px;height:auto;border:none;border-top:1px solid #ddd;order:2}
-            .container{flex-direction:column-reverse}
-            .menu-item{padding:8px;text-align:center;flex-direction:column}
-            .stats{grid-template-columns:repeat(2,1fr);gap:10px}
-            .form-grid{grid-template-columns:1fr}
-        }
+        .stat-box{background:#fff;padding:20px;border-radius:8px;text-align:center;box-shadow:0 2px 4px rgba(0,0,0,0.1)}
+        .stat-box .number{font-size:32px;font-weight:bold;color:#0ea5e9}
+        .stat-box .label{font-size:12px;color:#999;margin-top:5px}
+        .file-upload{border:2px dashed #0ea5e9;padding:20px;text-align:center;border-radius:5px;cursor:pointer;margin:10px 0;color:#0ea5e9}
+        .file-item{background:#f0fdf4;padding:10px;border-radius:5px;margin:5px 0;display:flex;justify-content:space-between;align-items:center;font-size:12px;border-left:4px solid #10b981}
+        .file-item button{padding:5px 10px;font-size:11px;margin-left:5px}
+        .badge{display:inline-block;padding:5px 10px;border-radius:20px;font-size:12px;font-weight:bold}
+        .badge-p{background:#fef3c7;color:#92400e}
+        .badge-t{background:#dbeafe;color:#0c4a6e}
+        .badge-f{background:#dcfce7;color:#166534}
     </style>
 </head>
 <body>
-
-<div id="loginScreen">
-    <div class="login-box">
-        <div class="login-logo">SIGOL</div>
-        <div class="login-sub">Sistema de Gestion de Oficios</div>
-        <div class="error" id="errorMsg"></div>
-        <div class="form-group">
-            <label>Nombre</label>
-            <input type="text" id="firstName" placeholder="Juan">
-        </div>
-        <div class="form-group">
-            <label>Apellido</label>
-            <input type="text" id="lastName" placeholder="Garcia">
-        </div>
-        <div class="form-group">
-            <label>Numero de Legajo</label>
-            <input type="text" id="legajoNumber" placeholder="2847">
-        </div>
-        <div class="form-group">
-            <label>Clave</label>
-            <input type="password" id="password" placeholder="Clave">
-        </div>
-        <button onclick="login()">INGRESAR</button>
-    </div>
-</div>
-
-<div id="dashboardScreen">
     <div class="header">
-        <div>SIGOL</div>
-        <div style="font-size:12px">
-            <span id="userFullName"></span> | <button onclick="logout()" style="background:none;color:#fff;border:none;cursor:pointer;text-decoration:underline;font-size:12px">Cerrar</button>
+        <h1>SIGOL</h1>
+        <div class="user">
+            <span id="userFullName">Usuario</span> | <a onclick="logout()">Cerrar</a>
         </div>
     </div>
-    <div class="container">
-        <div class="sidebar">
-            <div class="menu-item active" onclick="showSection('dashboard')"><i class="fas fa-chart-line"></i> Panel</div>
-            <div class="menu-item" onclick="openNewModal()"><i class="fas fa-plus-circle"></i> Nuevo</div>
-            <div class="menu-item" onclick="showSection('list')"><i class="fas fa-list"></i> Oficios</div>
-            <div class="menu-item" onclick="showSection('contacts')"><i class="fas fa-envelope"></i> Contactos</div>
+
+    <div id="loginScreen" style="display:flex;justify-content:center;align-items:center;height:calc(100vh - 60px);background:#f5f5f5">
+        <div style="background:#fff;padding:40px;border-radius:10px;box-shadow:0 4px 6px rgba(0,0,0,0.1);width:400px">
+            <h2 style="text-align:center;margin-bottom:30px;color:#0d3d56">SIGOL</h2>
+            <div class="form-group">
+                <label>Nombre</label>
+                <input type="text" id="firstName" placeholder="Juan">
+            </div>
+            <div class="form-group">
+                <label>Apellido</label>
+                <input type="text" id="lastName" placeholder="García">
+            </div>
+            <div class="form-group">
+                <label>Número de Legajo</label>
+                <input type="text" id="legajoNumber" placeholder="2847">
+            </div>
+            <div class="form-group">
+                <label>Clave</label>
+                <input type="password" id="password" placeholder="Clave">
+            </div>
+            <div id="errorMsg" style="display:none;background:#fee;color:#c33;padding:10px;border-radius:5px;margin-bottom:15px"></div>
+            <button class="btn" onclick="login()" style="width:100%;padding:12px">INGRESAR</button>
         </div>
-        <div class="content">
-            <div id="section-dashboard" class="section active">
+    </div>
+
+    <div id="dashboardScreen" style="display:none" class="container">
+        <div class="sidebar">
+            <div class="sidebar-item active" onclick="showSection('panel')"><i class="fas fa-chart-bar"></i> Panel</div>
+            <div class="sidebar-item" onclick="openNewModal()"><i class="fas fa-plus-circle"></i> Nuevo</div>
+            <div class="sidebar-item" onclick="showSection('oficios')"><i class="fas fa-file-alt"></i> Oficios</div>
+            <div class="sidebar-item" onclick="showSection('contactos')"><i class="fas fa-address-book"></i> Contactos</div>
+        </div>
+
+        <div class="main">
+            <div id="panelSection">
                 <div class="stats">
-                    <div class="stat"><div class="stat-num" id="total">0</div><div class="stat-label">Total</div></div>
-                    <div class="stat"><div class="stat-num" id="pend">0</div><div class="stat-label">Pendientes</div></div>
-                    <div class="stat"><div class="stat-num" id="tram">0</div><div class="stat-label">Tramite</div></div>
-                    <div class="stat"><div class="stat-num" id="final">0</div><div class="stat-label">Finalizados</div></div>
+                    <div class="stat-box">
+                        <div class="number" id="total">0</div>
+                        <div class="label">Total</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="number" id="pend">0</div>
+                        <div class="label">Pendientes</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="number" id="tram">0</div>
+                        <div class="label">En Trámite</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="number" id="final">0</div>
+                        <div class="label">Finalizados</div>
+                    </div>
                 </div>
-                <div class="search-box">
-                    <input type="text" id="search" placeholder="Buscar legajo..." onkeyup="filterTable()">
-                    <select id="filterState" onchange="filterTable()" style="width:100%;padding:8px;margin-top:5px;border:1px solid #ddd;border-radius:5px">
-                        <option value="">Todos</option>
+            </div>
+
+            <div id="oficiosSection" style="display:none">
+                <div class="card">
+                    <h2>Oficios</h2>
+                    <input type="text" id="search" placeholder="Buscar legajo..." onkeyup="filterTable()" style="width:100%;padding:10px;margin:10px 0;border:1px solid #ddd;border-radius:5px">
+                    <select id="filterState" onchange="filterTable()" style="width:100%;padding:10px;margin:10px 0;border:1px solid #ddd;border-radius:5px">
+                        <option value="">Todos los estados</option>
                         <option value="Pendiente">Pendiente</option>
-                        <option value="En Tramite">En Tramite</option>
+                        <option value="En Tramite">En Trámite</option>
                         <option value="Finalizado">Finalizado</option>
                     </select>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Legajo</th>
+                                <th>Técnico</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table"></tbody>
+                    </table>
                 </div>
-                <button class="btn" onclick="openNewModal()" style="margin-bottom:15px">+ Nuevo Oficio</button>
-                <table>
-                    <thead><tr><th>Legajo</th><th>Tecnico</th><th>Estado</th><th>Acc</th></tr></thead>
-                    <tbody id="table"></tbody>
-                </table>
-            </div>
-            <div id="section-new" class="section">
-                <button class="btn" onclick="openNewModal()" style="width:100%;padding:15px;font-size:14px">+ Crear Oficio</button>
-            </div>
-            <div id="section-list" class="section">
-                <h3 style="margin-bottom:15px">Oficios</h3>
                 <div id="list"></div>
             </div>
-            <div id="section-contacts" class="section">
-                <h3 style="margin-bottom:15px">Contactos</h3>
-                <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:15px">
-                    <div class="contact-box">
-                        <div class="contact-title">Delitos Telematicos</div>
-                        <div class="contact-email">divdtelematicos@outlook.com</div>
-                        <div class="btn-group">
-                            <button class="btn btn-sm" onclick="window.open('https://outlook.live.com')"><i class="fas fa-envelope"></i></button>
-                            <button class="btn btn-sm" onclick="window.open('https://drive.google.com')"><i class="fas fa-cloud"></i></button>
-                        </div>
-                    </div>
-                    <div class="contact-box">
-                        <div class="contact-title">Laboratorio Fotografico</div>
-                        <div class="contact-email">laboratorio@outlook.com</div>
-                        <div class="btn-group">
-                            <button class="btn btn-sm" onclick="window.open('https://outlook.live.com')"><i class="fas fa-envelope"></i></button>
-                            <button class="btn btn-sm" onclick="window.open('https://drive.google.com')"><i class="fas fa-cloud"></i></button>
-                        </div>
-                    </div>
+
+            <div id="contactosSection" style="display:none">
+                <div class="card">
+                    <h2>Contactos</h2>
+                    <p>Sección en desarrollo</p>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-<div class="modal" id="newModal">
-    <div class="modal-box">
-        <div class="modal-header">
-            <span id="modalTitle">Crear Oficio</span>
-            <button class="modal-close" onclick="closeModal('newModal')">×</button>
-        </div>
-        <div class="modal-body">
-            <div class="form-section">
-                <div style="font-weight:bold;margin-bottom:10px">Informacion</div>
-                <div class="form-grid">
-                    <div><label>Legajo</label><input type="text" id="legajo"></div>
-                    <div><label>Causa</label><input type="text" id="causa"></div>
-                    <div><label>Fiscalia</label><input type="text" id="fiscalia"></div>
-                    <div><label>Fecha</label><input type="date" id="fecha"></div>
-                </div>
-            </div>
-            <div class="form-section">
-                <div style="font-weight:bold;margin-bottom:10px">Personas</div>
-                <div class="form-grid">
-                    <div><label>Victima</label><input type="text" id="victima"></div>
-                    <div><label>Causante</label><input type="text" id="causante"></div>
-                </div>
-            </div>
-            <div class="form-section">
-                <div style="font-weight:bold;margin-bottom:10px">Asignacion</div>
-                <div class="form-grid">
-                    <div><label>Division</label><select id="division"><option value="TELEMATICO">Delitos Telematicos</option><option value="LABORATORIO">Laboratorio</option></select></div>
-                    <div><label>Tecnico</label><input type="text" id="tecnico"></div>
-                    <div><label>Estado</label><select id="estado"><option value="Pendiente">Pendiente</option><option value="En Tramite">En Tramite</option><option value="Finalizado">Finalizado</option></select></div>
-                </div>
-            </div>
-            <div class="form-section">
-                <div style="font-weight:bold;margin-bottom:10px">Archivos</div>
-                <div class="file-upload" id="fileUpload"><i class="fas fa-cloud-upload-alt"></i><div>Arrastra o haz clic para subir PDF/Word</div></div>
-                <div class="file-list" id="fileList"></div>
-                <div style="font-weight:bold;margin-top:15px;margin-bottom:10px">Archivos Guardados</div>
-                <div class="file-list" id="savedFileList" style="background:#f9fafb;padding:10px;border-radius:5px;min-height:50px"></div>
-            </div>
-        </div>
-        <div class="modal-footer">
-            <button class="btn btn-sec" onclick="closeModal('newModal')">Cancelar</button>
-            <button class="btn" onclick="save()">Guardar</button>
-        </div>
-    </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-const SUPA_URL='https://gmbhptqijgrlxosfskva.supabase.co';
-const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdtYmhwdHFpamdybHhvc2Zza3ZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwNjIyNTAsImV4cCI6MjA5MjYzODI1MH0.FQRwIjvLeXUaNM_Vx2R2KLuYJyWgNrjmuP85QTdRBLY';
-const CLAVE='3813';
-
-let supa=null;
-let user=null;
-let data=[];
-let editing=null;
-let files=[];
-
-function getSupa(){
-    if(!supa&&window.supabase){
-        supa=window.supabase.createClient(SUPA_URL,SUPA_KEY);
-    }
-    return supa;
-}
-
-document.getElementById('fileUpload')?.addEventListener('click',()=>document.getElementById('fileInput')?.click());
-document.getElementById('fileUpload')?.addEventListener('dragover',e=>{e.preventDefault();e.target.style.background='#e0f2fe'});
-document.getElementById('fileUpload')?.addEventListener('dragleave',e=>{e.target.style.background='#f0f9ff'});
-document.getElementById('fileUpload')?.addEventListener('drop',e=>{
-    e.preventDefault();
-    e.target.style.background='#f0f9ff';
-    files=Array.from(e.dataTransfer.files);
-    renderFiles();
-});
-
-let fileInput=document.createElement('input');
-fileInput.type='file';
-fileInput.id='fileInput';
-fileInput.accept='.pdf,.doc,.docx';
-fileInput.multiple=true;
-fileInput.style.display='none';
-fileInput.addEventListener('change',e=>{files=Array.from(e.target.files);renderFiles()});
-document.body.appendChild(fileInput);
-
-function renderFiles(){
-    const l=document.getElementById('fileList');
-    l.innerHTML='';
-    files.forEach((f,i)=>{
-        l.innerHTML+=`<div class="file-item"><span><i class="fas fa-file"></i> ${f.name}</span><button class="btn btn-sm" onclick="removeFile(${i})" style="background:#ef4444;padding:3px 6px">×</button></div>`;
-    });
-}
-
-function removeFile(i){
-    files.splice(i,1);
-    renderFiles();
-}
-
-async function login(){
-    const f=document.getElementById('firstName').value.trim();
-    const l=document.getElementById('lastName').value.trim();
-    const leg=document.getElementById('legajoNumber').value.trim();
-    const p=document.getElementById('password').value;
-    const err=document.getElementById('errorMsg');
-    err.style.display='none';
-    
-    if(!f||!l||!leg||!p){
-        err.textContent='Completa todos los campos';
-        err.style.display='block';
-        return;
-    }
-    if(!/^\d+$/.test(leg)){
-        err.textContent='Legajo solo numeros';
-        err.style.display='block';
-        return;
-    }
-    if(p!==CLAVE){
-        err.textContent='Clave incorrecta';
-        err.style.display='block';
-        return;
-    }
-    
-    user={n:f,a:l,l:leg};
-    localStorage.setItem('su',JSON.stringify(user));
-    document.getElementById('loginScreen').style.display='none';
-    document.getElementById('dashboardScreen').style.display='block';
-    document.getElementById('userFullName').textContent=f+' '+l;
-    await load();
-}
-
-function logout(){
-    if(confirm('Cerrar sesion?')){
-        user=null;
-        localStorage.removeItem('su');
-        document.getElementById('dashboardScreen').style.display='none';
-        document.getElementById('loginScreen').style.display='flex';
-    }
-}
-
-async function load(){
-    const s=getSupa();
-    if(!s){
-        console.log('Supabase no está disponible');
-        return setTimeout(load,200);
-    }
-    try{
-        console.log('Cargando oficios...');
-        const{data:d,error:e}=await s.from('oficios').select('*').order('created_at',{ascending:false});
-        console.log('Datos cargados:', d);
-        console.log('Error:', e);
-        if(e)throw e;
-        data=d||[];
-        console.log('Total de oficios:', data.length);
-        render();
-    }catch(e){
-        console.error('Error en load:', e);
-    }
-}
-
-function render(){
-    const t=document.getElementById('table');
-    const l=document.getElementById('list');
-    
-    document.getElementById('total').textContent=data.length;
-    document.getElementById('pend').textContent=data.filter(x=>x.estado==='Pendiente').length;
-    document.getElementById('tram').textContent=data.filter(x=>x.estado==='En Tramite').length;
-    document.getElementById('final').textContent=data.filter(x=>x.estado==='Finalizado').length;
-    
-    t.innerHTML='';
-    l.innerHTML='';
-    
-    if(data.length===0){
-        t.innerHTML='<tr><td colspan="4" style="text-align:center">Sin oficios</td></tr>';
-        l.innerHTML='<p style="text-align:center;color:#999">Sin oficios</p>';
-        return;
-    }
-    
-    data.forEach(x=>{
-        const estado=x.estado||'Pendiente';
-        const col=estado==='Pendiente'?'badge-p':estado==='En Tramite'?'badge-t':'badge-f';
-        const causa=x.causa||'Sin especificar';
-        const fiscalia=x.fiscalia||'Sin especificar';
-        const tecnico=x.tecnico_principal||'-';
-        
-        t.innerHTML+=`<tr><td>${x.numero_legajo}</td><td>${tecnico}</td><td><span class="badge ${col}">${estado}</span></td><td><button class="btn" style="padding:3px 6px;font-size:10px" onclick="edit('${x.id}')">E</button></td></tr>`;
-        l.innerHTML+=`<div style="background:#fff;padding:12px;border-radius:5px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,0.1);border-left:4px solid #0ea5e9"><div style="font-weight:bold">${x.numero_legajo}</div><div style="font-size:11px;color:#666;margin:5px 0">${causa}</div><div style="font-size:11px;margin-bottom:8px"><b>F:</b> ${fiscalia} | <b>T:</b> ${tecnico}</div><div style="margin-bottom:8px"><span class="badge" style="background:#0ea5e9;color:#fff">${estado}</span></div><button class="btn" style="padding:5px 8px;font-size:10px" onclick="edit('${x.id}')">Editar</button> <button class="btn" style="padding:5px 8px;font-size:10px;background:#10b981" onclick="cambiarEstado('${x.id}')">Estado</button></div>`;
-    });
-}
-
-function filterTable(){
-    const s=(document.getElementById('search').value||'').toLowerCase();
-    const f=document.getElementById('filterState').value;
-    const t=document.getElementById('table');
-    t.innerHTML='';
-    const fil=data.filter(x=>{
-        const m=!s||String(x.numero_legajo||'').toLowerCase().includes(s);
-        const st=!f||(x.estado||'Pendiente')===f;
-        return m&&st;
-    });
-    if(fil.length===0){
-        t.innerHTML='<tr><td colspan="4" style="text-align:center">Sin oficios</td></tr>';
-        return;
-    }
-    fil.forEach(x=>{
-        const estado=x.estado||'Pendiente';
-        const col=estado==='Pendiente'?'badge-p':estado==='En Tramite'?'badge-t':'badge-f';
-        const tecnico=x.tecnico_principal||'-';
-        t.innerHTML+=`<tr><td>${x.numero_legajo}</td><td>${tecnico}</td><td><span class="badge ${col}">${estado}</span></td><td><button class="btn" style="padding:3px 6px;font-size:10px" onclick="edit('${x.id}')">E</button></td></tr>`;
-    });
-}
-
-async function save(){
-    const s=getSupa();
-    if(!s)return;
-    
-    try{
-        let archivosPaths=[];
-        
-        // Subir archivos a Storage
-        if(files.length>0){
-            const legajo=document.getElementById('legajo').value;
-            const folder=`${legajo}/${Date.now()}`;
+    <div class="modal" id="newModal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal('newModal')">×</span>
+            <h2 id="modalTitle">Crear Oficio</h2>
             
-            for(const file of files){
-                const path=`${folder}/${file.name}`;
-                const{data:uploadData,error:uploadError}=await s.storage.from('oficios-archivos').upload(path,file);
-                if(uploadError)throw new Error(`Error subiendo ${file.name}: ${uploadError.message}`);
-                archivosPaths.push(path);
+            <div class="form-group">
+                <label>Número de Legajo</label>
+                <input type="text" id="legajo" placeholder="S-032683-2026">
+            </div>
+            
+            <div class="form-group">
+                <label>Causa</label>
+                <input type="text" id="causa" placeholder="Descripción de la causa">
+            </div>
+            
+            <div class="form-group">
+                <label>Fiscalía</label>
+                <input type="text" id="fiscalia" placeholder="Nombre de la fiscalía">
+            </div>
+            
+            <div class="form-group">
+                <label>División</label>
+                <select id="division">
+                    <option>Delitos Telematicos</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Técnico</label>
+                <input type="text" id="tecnico" placeholder="Nombre del técnico">
+            </div>
+            
+            <div class="form-group">
+                <label>Estado</label>
+                <select id="estado">
+                    <option>Pendiente</option>
+                    <option>En Tramite</option>
+                    <option>Finalizado</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Archivos</label>
+                <div class="file-upload" id="fileUpload">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <div>Arrastra o haz clic para subir PDF/Word</div>
+                </div>
+                <div id="fileList"></div>
+            </div>
+            
+            <div style="display:flex;gap:10px">
+                <button class="btn" onclick="closeModal('newModal')" style="flex:1;background:#999">Cancelar</button>
+                <button class="btn" onclick="save()" style="flex:1">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SUPA_URL='https://gmbhptqijgrlxosfskva.supabase.co';
+        const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdtYmhwdHFpamdybHhvc2Zza3ZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwNjIyNTAsImV4cCI6MjA5MjYzODI1MH0.FQRwIjvLeXUaNM_Vx2R2KLuYJyWgNrjmuP85QTdRBLY';
+        const CLAVE='1234';
+        
+        let supa=null;
+        let user=null;
+        let data=[];
+        let editing=null;
+        let files=[];
+
+        function getSupa(){
+            if(!supa&&window.supabase){
+                supa=window.supabase.createClient(SUPA_URL,SUPA_KEY);
+            }
+            return supa;
+        }
+
+        document.getElementById('fileUpload')?.addEventListener('click',()=>document.getElementById('fileInput')?.click());
+        document.getElementById('fileUpload')?.addEventListener('dragover',e=>{e.preventDefault();e.target.style.background='#e0f2fe'});
+        document.getElementById('fileUpload')?.addEventListener('dragleave',e=>{e.target.style.background='#f0f9ff'});
+        document.getElementById('fileUpload')?.addEventListener('drop',e=>{
+            e.preventDefault();
+            e.target.style.background='#f0f9ff';
+            files=Array.from(e.dataTransfer.files);
+            renderFiles();
+        });
+
+        let fileInput=document.createElement('input');
+        fileInput.type='file';
+        fileInput.id='fileInput';
+        fileInput.accept='.pdf,.doc,.docx';
+        fileInput.multiple=true;
+        fileInput.addEventListener('change',e=>{files=Array.from(e.target.files);renderFiles()});
+        document.body.appendChild(fileInput);
+
+        function renderFiles(){
+            const l=document.getElementById('fileList');
+            l.innerHTML='';
+            files.forEach((f,i)=>{
+                l.innerHTML+=`<div class="file-item"><span><i class="fas fa-file"></i> ${f.name}</span><button class="btn btn-danger" onclick="removeFile(${i})" style="padding:3px 6px">×</button></div>`;
+            });
+        }
+
+        function removeFile(i){
+            files.splice(i,1);
+            renderFiles();
+        }
+
+        async function login(){
+            const f=document.getElementById('firstName').value.trim();
+            const l=document.getElementById('lastName').value.trim();
+            const leg=document.getElementById('legajoNumber').value.trim();
+            const p=document.getElementById('password').value;
+            const err=document.getElementById('errorMsg');
+            err.style.display='none';
+            
+            if(!f||!l||!leg||!p){
+                err.textContent='Completa todos los campos';
+                err.style.display='block';
+                return;
+            }
+            if(p!==CLAVE){
+                err.textContent='Clave incorrecta';
+                err.style.display='block';
+                return;
+            }
+            
+            user={n:f,a:l,l:leg};
+            localStorage.setItem('su',JSON.stringify(user));
+            document.getElementById('loginScreen').style.display='none';
+            document.getElementById('dashboardScreen').style.display='flex';
+            document.getElementById('userFullName').textContent=f+' '+l;
+            await load();
+        }
+
+        function logout(){
+            if(confirm('¿Cerrar sesión?')){
+                user=null;
+                localStorage.removeItem('su');
+                document.getElementById('dashboardScreen').style.display='none';
+                document.getElementById('loginScreen').style.display='flex';
             }
         }
-        
-        const d={
-            numero_legajo:document.getElementById('legajo').value||'SIN NÚMERO',
-            causa:document.getElementById('causa').value||'',
-            fiscalia:document.getElementById('fiscalia').value||'',
-            fecha_recepcion:document.getElementById('fecha').value||null,
-            victima:document.getElementById('victima').value||'',
-            causante:document.getElementById('causante').value||'',
-            dependencia:document.getElementById('division').value||'',
-            tecnico_principal:document.getElementById('tecnico').value||'',
-            estado:document.getElementById('estado').value||'Pendiente',
-            usuario_creador:user.n||'',
-            archivos:archivosPaths.join('|')||'',
-            created_at:new Date().toISOString(),
-            updated_at:new Date().toISOString()
-        };
-        
-        if(editing){
-            const{error:e}=await s.from('oficios').update(d).eq('id',editing);
-            if(e)throw e;
-        }else{
-            const{error:e}=await s.from('oficios').insert([d]);
-            if(e)throw e;
+
+        async function load(){
+            const s=getSupa();
+            if(!s)return setTimeout(load,200);
+            try{
+                const{data:d,error:e}=await s.from('oficios').select('*').order('created_at',{ascending:false});
+                if(e)throw e;
+                data=d||[];
+                render();
+            }catch(e){
+                console.error('Error cargando:',e);
+            }
         }
-        
-        closeModal('newModal');
-        editing=null;
-        files=[];
-        await load();
-    }catch(e){
-        alert('Error: '+e.message);
-    }
-}
 
-async function edit(id){
-    console.log('Edit called with id:', id, 'data:', data);
-    const x=data.find(i=>String(i.id)===String(id));
-    console.log('Found record:', x);
-    if(!x){
-        alert('No se encontró el oficio');
-        return;
-    }
-    editing=id;
-    document.getElementById('modalTitle').textContent='Editar Oficio';
-    document.getElementById('legajo').value=x.numero_legajo||'';
-    document.getElementById('causa').value=x.causa||'';
-    document.getElementById('fiscalia').value=x.fiscalia||'';
-    document.getElementById('fecha').value=x.fecha_recepcion||'';
-    document.getElementById('victima').value=x.victima||'';
-    document.getElementById('causante').value=x.causante||'';
-    document.getElementById('division').value=x.dependencia||'';
-    document.getElementById('tecnico').value=x.tecnico_principal||'';
-    document.getElementById('estado').value=x.estado||'';
-    files=[];
-    renderFiles();
-    await renderSavedFiles();
-    openModal('newModal');
-}
-
-async function cambiarEstado(id){
-    const x=data.find(i=>String(i.id)===String(id));
-    if(!x)return;
-    const e=['Pendiente','En Tramite','Finalizado'];
-    const i=e.indexOf(x.estado||'Pendiente');
-    const n=e[(i+1)%e.length];
-    const s=getSupa();
-    if(!s)return;
-    try{
-        const{error:err}=await s.from('oficios').update({estado:n,updated_at:new Date().toISOString()}).eq('id',id);
-        if(err)throw err;
-        await load();
-    }catch(err){
-        alert('Error: '+err.message);
-    }
-}
-
-async function renderSavedFiles(){
-    const s=getSupa();
-    if(!s||!editing)return;
-    
-    try{
-        const x=data.find(i=>String(i.id)===String(editing));
-        if(!x||!x.archivos||x.archivos.trim()===''||x.archivos==='EMPTY'){
-            document.getElementById('savedFileList').innerHTML='<p style="color:#999;font-size:11px">No hay archivos guardados</p>';
-            return;
+        function render(){
+            const t=document.getElementById('table');
+            const l=document.getElementById('list');
+            
+            document.getElementById('total').textContent=data.length;
+            document.getElementById('pend').textContent=data.filter(x=>x.estado==='Pendiente').length;
+            document.getElementById('tram').textContent=data.filter(x=>x.estado==='En Tramite').length;
+            document.getElementById('final').textContent=data.filter(x=>x.estado==='Finalizado').length;
+            
+            t.innerHTML='';
+            l.innerHTML='';
+            
+            if(data.length===0){
+                t.innerHTML='<tr><td colspan="4" style="text-align:center">Sin oficios</td></tr>';
+                return;
+            }
+            
+            data.forEach(x=>{
+                const estado=x.estado||'Pendiente';
+                const col=estado==='Pendiente'?'badge-p':estado==='En Tramite'?'badge-t':'badge-f';
+                const tecnico=x.tecnico_principal||'-';
+                
+                t.innerHTML+=`<tr><td>${x.numero_legajo}</td><td>${tecnico}</td><td><span class="badge ${col}">${estado}</span></td><td><button class="btn" onclick="edit('${x.id}')" style="padding:5px 10px;font-size:11px">Editar</button> <button class="btn btn-success" onclick="cambiarEstado('${x.id}')" style="padding:5px 10px;font-size:11px">Estado</button> <button class="btn btn-danger" onclick="deleteOficio('${x.id}')" style="padding:5px 10px;font-size:11px">Eliminar</button></td></tr>`;
+                l.innerHTML+=`<div style="background:#fff;padding:15px;border-radius:8px;margin-bottom:15px;box-shadow:0 2px 4px rgba(0,0,0,0.1);border-left:4px solid #0ea5e9"><div style="font-weight:bold">${x.numero_legajo}</div><div style="font-size:12px;color:#666;margin:5px 0">${x.causa||'-'}</div><div style="font-size:12px;margin-bottom:10px"><b>F:</b> ${x.fiscalia||'-'} | <b>T:</b> ${tecnico}</div><div style="margin-bottom:10px"><span class="badge" style="background:#0ea5e9;color:#fff">${estado}</span></div><button class="btn" onclick="edit('${x.id}')" style="padding:5px 10px;font-size:11px;margin-right:5px">Editar</button><button class="btn btn-success" onclick="cambiarEstado('${x.id}')" style="padding:5px 10px;font-size:11px;margin-right:5px">Estado</button><button class="btn btn-danger" onclick="deleteOficio('${x.id}')" style="padding:5px 10px;font-size:11px">Eliminar</button></div>`;
+            });
         }
-        
-        let html='';
-        
-        // Parsear los paths guardados en la columna archivos
-        const archivosGuardados=x.archivos.split('/').filter(p=>p&&p!=='EMPTY');
-        
-        if(archivosGuardados.length===0){
-            document.getElementById('savedFileList').innerHTML='<p style="color:#999;font-size:11px">No hay archivos guardados</p>';
-            return;
+
+        function filterTable(){
+            const s=(document.getElementById('search').value||'').toLowerCase();
+            const f=document.getElementById('filterState').value;
+            const t=document.getElementById('table');
+            t.innerHTML='';
+            const fil=data.filter(x=>{
+                const m=!s||String(x.numero_legajo||'').toLowerCase().includes(s);
+                const st=!f||(x.estado||'Pendiente')===f;
+                return m&&st;
+            });
+            if(fil.length===0){
+                t.innerHTML='<tr><td colspan="4" style="text-align:center">Sin oficios</td></tr>';
+                return;
+            }
+            fil.forEach(x=>{
+                const estado=x.estado||'Pendiente';
+                const col=estado==='Pendiente'?'badge-p':estado==='En Tramite'?'badge-t':'badge-f';
+                const tecnico=x.tecnico_principal||'-';
+                t.innerHTML+=`<tr><td>${x.numero_legajo}</td><td>${tecnico}</td><td><span class="badge ${col}">${estado}</span></td><td><button class="btn" onclick="edit('${x.id}')" style="padding:5px 10px;font-size:11px">Editar</button> <button class="btn btn-success" onclick="cambiarEstado('${x.id}')" style="padding:5px 10px;font-size:11px">Estado</button> <button class="btn btn-danger" onclick="deleteOficio('${x.id}')" style="padding:5px 10px;font-size:11px">Eliminar</button></td></tr>`;
+            });
         }
-        
-        // El último elemento es el nombre del archivo
-        for(const archivo of archivosGuardados){
-            const filename=archivo.split('-').pop()||archivo; // Extrae el nombre después del último guión
-            html+=`<div class="file-item saved">
-                <span><i class="fas fa-file-pdf"></i> ${filename}</span>
-                <div>
-                    <button class="btn-download" onclick="downloadFile('${x.numero_legajo}/${archivo}')">Descargar</button>
-                    <button class="btn-delete" onclick="deleteFile('${x.numero_legajo}/${archivo}','${editing}')">Eliminar</button>
-                </div>
-            </div>`;
+
+        async function save(){
+            const s=getSupa();
+            if(!s)return;
+            
+            try{
+                const d={
+                    numero_legajo:document.getElementById('legajo').value||'SIN NÚMERO',
+                    causa:document.getElementById('causa').value||'',
+                    fiscalia:document.getElementById('fiscalia').value||'',
+                    tecnico_principal:document.getElementById('tecnico').value||'',
+                    estado:document.getElementById('estado').value||'Pendiente',
+                    usuario_creador:user.n||'',
+                    archivos:files.map(f=>f.name).join('|')||'',
+                    created_at:new Date().toISOString(),
+                    updated_at:new Date().toISOString()
+                };
+                
+                if(editing){
+                    const{error:e}=await s.from('oficios').update(d).eq('id',editing);
+                    if(e)throw e;
+                }else{
+                    const{error:e}=await s.from('oficios').insert([d]);
+                    if(e)throw e;
+                }
+                
+                closeModal('newModal');
+                editing=null;
+                files=[];
+                await load();
+            }catch(e){
+                alert('Error: '+e.message);
+            }
         }
-        
-        if(html===''){
-            document.getElementById('savedFileList').innerHTML='<p style="color:#999;font-size:11px">No hay archivos guardados</p>';
-        }else{
-            document.getElementById('savedFileList').innerHTML=html;
+
+        async function edit(id){
+            const x=data.find(i=>String(i.id)===String(id));
+            if(!x)return;
+            editing=id;
+            document.getElementById('modalTitle').textContent='Editar Oficio';
+            document.getElementById('legajo').value=x.numero_legajo||'';
+            document.getElementById('causa').value=x.causa||'';
+            document.getElementById('fiscalia').value=x.fiscalia||'';
+            document.getElementById('tecnico').value=x.tecnico_principal||'';
+            document.getElementById('estado').value=x.estado||'Pendiente';
+            files=[];
+            renderFiles();
+            openModal('newModal');
         }
-    }catch(e){
-        console.error('Error:', e);
-        document.getElementById('savedFileList').innerHTML='<p style="color:#999;font-size:11px">Error al cargar archivos</p>';
-    }
-}
 
-async function downloadFile(path){
-    const s=getSupa();
-    if(!s)return;
-    
-    try{
-        const filename=path.split('/').pop();
-        const{data:url,error}=await s.storage.from('archivos').createSignedUrl(path,3600);
-        if(error)throw error;
-        
-        const a=document.createElement('a');
-        a.href=url.signedUrl;
-        a.download=filename;
-        a.click();
-    }catch(e){
-        alert('Error descargando: '+e.message);
-    }
-}
-
-async function deleteFile(path,ofidioId){
-    if(!confirm('¿Eliminar este archivo?'))return;
-    
-    const s=getSupa();
-    if(!s)return;
-    
-    try{
-        const{error}=await s.storage.from('archivos').remove([path]);
-        if(error)throw error;
-        
-        const x=data.find(i=>String(i.id)===String(ofidioId));
-        if(x){
-            const paths=x.archivos.split('|').filter(p=>p&&p!==path);
-            await s.from('oficios').update({archivos:paths.join('|')}).eq('id',ofidioId);
-            await renderSavedFiles();
+        async function cambiarEstado(id){
+            const x=data.find(i=>String(i.id)===String(id));
+            if(!x)return;
+            const e=['Pendiente','En Tramite','Finalizado'];
+            const i=e.indexOf(x.estado||'Pendiente');
+            const n=e[(i+1)%e.length];
+            const s=getSupa();
+            if(!s)return;
+            try{
+                const{error:err}=await s.from('oficios').update({estado:n,updated_at:new Date().toISOString()}).eq('id',id);
+                if(err)throw err;
+                await load();
+            }catch(err){
+                alert('Error: '+err.message);
+            }
         }
-    }catch(e){
-        alert('Error eliminando: '+e.message);
-    }
-}
 
-function openNewModal(){
-    editing=null;
-    document.getElementById('modalTitle').textContent='Nuevo Oficio';
-    document.getElementById('legajo').value='';
-    document.getElementById('causa').value='';
-    document.getElementById('fiscalia').value='';
-    document.getElementById('fecha').value='';
-    document.getElementById('victima').value='';
-    document.getElementById('causante').value='';
-    document.getElementById('division').value='Delitos Telematicos';
-    document.getElementById('tecnico').value='';
-    document.getElementById('estado').value='Pendiente';
-    files=[];
-    renderFiles();
-    document.getElementById('savedFileList').innerHTML='<p style="color:#999;font-size:11px">Sin archivos guardados aún</p>';
-    openModal('newModal');
-}
+        async function deleteOficio(id){
+            if(!confirm('¿Eliminar este oficio?'))return;
+            const s=getSupa();
+            if(!s)return;
+            try{
+                const{error:e}=await s.from('oficios').delete().eq('id',id);
+                if(e)throw e;
+                await load();
+            }catch(e){
+                alert('Error: '+e.message);
+            }
+        }
 
-function openModal(id){document.getElementById(id).classList.add('active')}
-function closeModal(id){
-    document.getElementById(id).classList.remove('active');
-    if(!editing){
-        document.getElementById('modalTitle').textContent='Crear Oficio';
-        document.getElementById('legajo').value='';
-        document.getElementById('causa').value='';
-        document.getElementById('fiscalia').value='';
-        document.getElementById('fecha').value='';
-        document.getElementById('victima').value='';
-        document.getElementById('causante').value='';
-        document.getElementById('division').value='TELEMATICO';
-        document.getElementById('tecnico').value='';
-        document.getElementById('estado').value='Pendiente';
-        files=[];
-        renderFiles();
-    }
-    editing=null;
-}
+        function openNewModal(){
+            editing=null;
+            document.getElementById('modalTitle').textContent='Nuevo Oficio';
+            document.getElementById('legajo').value='';
+            document.getElementById('causa').value='';
+            document.getElementById('fiscalia').value='';
+            document.getElementById('tecnico').value='';
+            document.getElementById('estado').value='Pendiente';
+            files=[];
+            renderFiles();
+            openModal('newModal');
+        }
 
-function showSection(s){
-    document.querySelectorAll('.section').forEach(x=>x.classList.remove('active'));
-    document.getElementById('section-'+s).classList.add('active');
-    document.querySelectorAll('.menu-item').forEach(x=>x.classList.remove('active'));
-    event.target.closest('.menu-item').classList.add('active');
-}
+        function openModal(id){document.getElementById(id).classList.add('active')}
+        
+        function closeModal(id){
+            document.getElementById(id).classList.remove('active');
+            editing=null;
+        }
 
-document.querySelectorAll('.modal').forEach(m=>{
-    m.addEventListener('click',e=>{
-        if(e.target===m)closeModal(m.id);
-    });
-});
+        function showSection(s){
+            document.getElementById('panelSection').style.display=s==='panel'?'block':'none';
+            document.getElementById('oficiosSection').style.display=s==='oficios'?'block':'none';
+            document.getElementById('contactosSection').style.display=s==='contactos'?'block':'none';
+        }
 
-const su=JSON.parse(localStorage.getItem('su'));
-if(su){
-    user=su;
-    document.getElementById('loginScreen').style.display='none';
-    document.getElementById('dashboardScreen').style.display='block';
-    document.getElementById('userFullName').textContent=su.n+' '+su.a;
-    setTimeout(load,300);
-}
-</script>
+        window.addEventListener('load',()=>{
+            const su=localStorage.getItem('su');
+            if(su){
+                user=JSON.parse(su);
+                document.getElementById('loginScreen').style.display='none';
+                document.getElementById('dashboardScreen').style.display='flex';
+                document.getElementById('userFullName').textContent=user.n+' '+user.a;
+                load();
+            }
+        });
+    </script>
 </body>
 </html>
