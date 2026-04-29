@@ -110,7 +110,7 @@
     <div class="container">
         <div class="sidebar">
             <div class="menu-item active" onclick="showSection('dashboard')"><i class="fas fa-chart-line"></i> Panel</div>
-            <div class="menu-item" onclick="showSection('new')"><i class="fas fa-plus-circle"></i> Nuevo</div>
+            <div class="menu-item" onclick="openNewModal()"><i class="fas fa-plus-circle"></i> Nuevo</div>
             <div class="menu-item" onclick="showSection('list')"><i class="fas fa-list"></i> Oficios</div>
             <div class="menu-item" onclick="showSection('contacts')"><i class="fas fa-envelope"></i> Contactos</div>
         </div>
@@ -131,14 +131,14 @@
                         <option value="Finalizado">Finalizado</option>
                     </select>
                 </div>
-                <button class="btn" onclick="openModal('newModal')" style="margin-bottom:15px">+ Nuevo Oficio</button>
+                <button class="btn" onclick="openNewModal()" style="margin-bottom:15px">+ Nuevo Oficio</button>
                 <table>
                     <thead><tr><th>Legajo</th><th>Tecnico</th><th>Estado</th><th>Acc</th></tr></thead>
                     <tbody id="table"></tbody>
                 </table>
             </div>
             <div id="section-new" class="section">
-                <button class="btn" onclick="openModal('newModal')" style="width:100%;padding:15px;font-size:14px">+ Crear Oficio</button>
+                <button class="btn" onclick="openNewModal()" style="width:100%;padding:15px;font-size:14px">+ Crear Oficio</button>
             </div>
             <div id="section-list" class="section">
                 <h3 style="margin-bottom:15px">Oficios</h3>
@@ -538,6 +538,24 @@ async function deleteFile(path,ofidioId){
     }catch(e){
         alert('Error eliminando: '+e.message);
     }
+}
+
+function openNewModal(){
+    editing=null;
+    document.getElementById('modalTitle').textContent='Nuevo Oficio';
+    document.getElementById('legajo').value='';
+    document.getElementById('causa').value='';
+    document.getElementById('fiscalia').value='';
+    document.getElementById('fecha').value='';
+    document.getElementById('victima').value='';
+    document.getElementById('causante').value='';
+    document.getElementById('division').value='Delitos Telematicos';
+    document.getElementById('tecnico').value='';
+    document.getElementById('estado').value='Pendiente';
+    files=[];
+    renderFiles();
+    document.getElementById('savedFileList').innerHTML='<p style="color:#999;font-size:11px">Sin archivos guardados aún</p>';
+    openModal('newModal');
 }
 
 function openModal(id){document.getElementById(id).classList.add('active')}
