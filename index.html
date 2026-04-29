@@ -418,7 +418,7 @@ async function save(){
     }
 }
 
-function edit(id){
+async function edit(id){
     console.log('Edit called with id:', id, 'data:', data);
     const x=data.find(i=>String(i.id)===String(id));
     console.log('Found record:', x);
