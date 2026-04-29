@@ -195,6 +195,11 @@
                 <div id="fileList"></div>
             </div>
             
+            <div class="form-group" id="savedFilesSection" style="display:none">
+                <label>Archivos Guardados</label>
+                <div id="savedFileList" style="background:#f0f9ff;padding:10px;border-radius:5px;border:1px solid #0ea5e9"></div>
+            </div>
+            
             <div style="display:flex;gap:10px">
                 <button class="btn" onclick="closeModal('newModal')" style="flex:1;background:#999">Cancelar</button>
                 <button class="btn" onclick="save()" style="flex:1">Guardar</button>
@@ -395,6 +400,29 @@
             document.getElementById('estado').value=x.estado||'Pendiente';
             files=[];
             renderFiles();
+            
+            // Mostrar archivos guardados
+            if(x.archivos&&x.archivos.trim()!==''){
+                const archivos=x.archivos.split('|').filter(a=>a.trim()!=='');
+                if(archivos.length>0){
+                    document.getElementById('savedFilesSection').style.display='block';
+                    let html='';
+                    archivos.forEach(archivo=>{
+                        html+=`<div class="file-item" style="background:#dcfce7;border-left-color:#10b981">
+                            <span><i class="fas fa-file"></i> ${archivo}</span>
+                            <div>
+                                <button class="btn btn-success" onclick="alert('Descargando: ${archivo}')" style="padding:5px 10px;font-size:11px;margin-right:5px">Descargar</button>
+                            </div>
+                        </div>`;
+                    });
+                    document.getElementById('savedFileList').innerHTML=html;
+                }else{
+                    document.getElementById('savedFilesSection').style.display='none';
+                }
+            }else{
+                document.getElementById('savedFilesSection').style.display='none';
+            }
+            
             openModal('newModal');
         }
 
@@ -438,6 +466,7 @@
             document.getElementById('estado').value='Pendiente';
             files=[];
             renderFiles();
+            document.getElementById('savedFilesSection').style.display='none';
             openModal('newModal');
         }
 
