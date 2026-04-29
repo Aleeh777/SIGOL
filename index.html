@@ -394,7 +394,7 @@ async function save(){
 }
 
 function edit(id){
-    const x=data.find(i=>i.id===id);
+    const x=data.find(i=>String(i.id)===String(id));
     if(!x)return;
     editing=id;
     document.getElementById('modalTitle').textContent='Editar Oficio';
@@ -413,7 +413,7 @@ function edit(id){
 }
 
 async function cambiarEstado(id){
-    const x=data.find(i=>i.id===id);
+    const x=data.find(i=>String(i.id)===String(id));
     if(!x)return;
     const e=['Pendiente','En Tramite','Finalizado'];
     const i=e.indexOf(x.estado||'Pendiente');
