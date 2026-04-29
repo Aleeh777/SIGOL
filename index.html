@@ -54,6 +54,11 @@
         .file-upload:hover{background:#e0f2fe}
         .file-list{margin-top:10px}
         .file-item{background:#f0fdf4;padding:8px;border-radius:5px;margin-bottom:5px;border-left:4px solid #10b981;display:flex;justify-content:space-between;align-items:center;font-size:11px}
+        .file-item.saved{background:#f0f9ff;border-left-color:#0ea5e9}
+        .btn-download{background:#10b981;color:#fff;padding:4px 8px;border-radius:3px;border:none;cursor:pointer;font-size:10px;font-weight:bold}
+        .btn-download:hover{background:#059669}
+        .btn-delete{background:#ef4444;color:#fff;padding:4px 8px;border-radius:3px;border:none;cursor:pointer;font-size:10px;font-weight:bold}
+        .btn-delete:hover{background:#dc2626}
         .contact-box{background:#fff;padding:15px;border-radius:5px;box-shadow:0 1px 3px rgba(0,0,0,0.1)}
         .contact-title{font-weight:bold;margin-bottom:5px}
         .contact-email{font-size:12px;color:#0ea5e9;margin-bottom:10px}
@@ -199,6 +204,8 @@
                 <div style="font-weight:bold;margin-bottom:10px">Archivos</div>
                 <div class="file-upload" id="fileUpload"><i class="fas fa-cloud-upload-alt"></i><div>Arrastra o haz clic para subir PDF/Word</div></div>
                 <div class="file-list" id="fileList"></div>
+                <div style="font-weight:bold;margin-top:15px;margin-bottom:10px">Archivos Guardados</div>
+                <div class="file-list" id="savedFileList" style="background:#f9fafb;padding:10px;border-radius:5px;min-height:50px"></div>
             </div>
         </div>
         <div class="modal-footer">
@@ -361,22 +368,39 @@ function filterTable(){
 async function save(){
     const s=getSupa();
     if(!s)return;
-    const d={
-        numero_legajo:document.getElementById('legajo').value,
-        causa:document.getElementById('causa').value,
-        fiscalia:document.getElementById('fiscalia').value,
-        fecha_recepcion:document.getElementById('fecha').value||null,
-        victima:document.getElementById('victima').value,
-        causante:document.getElementById('causante').value,
-        dependencia:document.getElementById('division').value,
-        tecnico_principal:document.getElementById('tecnico').value,
-        estado:document.getElementById('estado').value,
-        usuario_creador:user.n,
-        archivos:files.map(f=>f.name).join(','),
-        created_at:new Date().toISOString(),
-        updated_at:new Date().toISOString()
-    };
+    
     try{
+        let archivosPaths=[];
+        
+        // Subir archivos a Storage
+        if(files.length>0){
+            const legajo=document.getElementById('legajo').value;
+            const folder=`${legajo}/${Date.now()}`;
+            
+            for(const file of files){
+                const path=`${folder}/${file.name}`;
+                const{data:uploadData,error:uploadError}=await s.storage.from('oficios-archivos').upload(path,file);
+                if(uploadError)throw new Error(`Error subiendo ${file.name}: ${uploadError.message}`);
+                archivosPaths.push(path);
+            }
+        }
+        
+        const d={
+            numero_legajo:document.getElementById('legajo').value,
+            causa:document.getElementById('causa').value,
+            fiscalia:document.getElementById('fiscalia').value,
+            fecha_recepcion:document.getElementById('fecha').value||null,
+            victima:document.getElementById('victima').value,
+            causante:document.getElementById('causante').value,
+            dependencia:document.getElementById('division').value,
+            tecnico_principal:document.getElementById('tecnico').value,
+            estado:document.getElementById('estado').value,
+            usuario_creador:user.n,
+            archivos:archivosPaths.join('|'),
+            created_at:new Date().toISOString(),
+            updated_at:new Date().toISOString()
+        };
+        
         if(editing){
             const{error:e}=await s.from('oficios').update(d).eq('id',editing);
             if(e)throw e;
@@ -384,6 +408,7 @@ async function save(){
             const{error:e}=await s.from('oficios').insert([d]);
             if(e)throw e;
         }
+        
         closeModal('newModal');
         editing=null;
         files=[];
@@ -414,6 +439,7 @@ function edit(id){
     document.getElementById('estado').value=x.estado||'';
     files=[];
     renderFiles();
+    await renderSavedFiles();
     openModal('newModal');
 }
 
@@ -431,6 +457,72 @@ async function cambiarEstado(id){
         await load();
     }catch(err){
         alert('Error: '+err.message);
+    }
+}
+
+async function renderSavedFiles(){
+    const s=getSupa();
+    if(!s||!editing)return;
+    
+    const x=data.find(i=>String(i.id)===String(editing));
+    if(!x||!x.archivos){
+        document.getElementById('savedFileList').innerHTML='<p style="color:#999;font-size:11px">No hay archivos guardados</p>';
+        return;
+    }
+    
+    const paths=x.archivos.split('|').filter(p=>p);
+    let html='';
+    
+    for(const path of paths){
+        const filename=path.split('/').pop();
+        html+=`<div class="file-item saved">
+            <span><i class="fas fa-file-pdf"></i> ${filename}</span>
+            <div>
+                <button class="btn-download" onclick="downloadFile('${path}')">Descargar</button>
+                <button class="btn-delete" onclick="deleteFile('${path}','${editing}')">Eliminar</button>
+            </div>
+        </div>`;
+    }
+    
+    document.getElementById('savedFileList').innerHTML=html;
+}
+
+async function downloadFile(path){
+    const s=getSupa();
+    if(!s)return;
+    
+    try{
+        const filename=path.split('/').pop();
+        const{data:url,error}=await s.storage.from('oficios-archivos').createSignedUrl(path,3600);
+        if(error)throw error;
+        
+        const a=document.createElement('a');
+        a.href=url.signedUrl;
+        a.download=filename;
+        a.click();
+    }catch(e){
+        alert('Error descargando: '+e.message);
+    }
+}
+
+async function deleteFile(path,ofidioId){
+    if(!confirm('¿Eliminar este archivo?'))return;
+    
+    const s=getSupa();
+    if(!s)return;
+    
+    try{
+        const{error}=await s.storage.from('oficios-archivos').remove([path]);
+        if(error)throw error;
+        
+        const x=data.find(i=>String(i.id)===String(ofidioId));
+        if(x){
+            const paths=x.archivos.split('|').filter(p=>p&&p!==path);
+            await s.from('oficios').update({archivos:paths.join('|')}).eq('id',ofidioId);
+            await renderSavedFiles();
+        }
+    }catch(e){
+        alert('Error eliminando: '+e.message);
     }
 }
 
