@@ -139,7 +139,24 @@
             <div id="contactosSection" style="display:none">
                 <div class="card">
                     <h2>Contactos</h2>
-                    <p>Sección en desarrollo</p>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Departamento</th>
+                                <th>Email</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Delitos Telemáticos</td>
+                                <td><a href="mailto:telematicos@brigada.gov.ar" style="color:#0ea5e9;text-decoration:none">telematicos@brigada.gov.ar</a></td>
+                            </tr>
+                            <tr>
+                                <td>Laboratorio Forense</td>
+                                <td><a href="mailto:labfotodicdc@gmail.com" style="color:#0ea5e9;text-decoration:none">labfotodicdc@gmail.com</a></td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -153,6 +170,11 @@
             <div class="form-group">
                 <label>Número de Legajo</label>
                 <input type="text" id="legajo" placeholder="S-032683-2026">
+            </div>
+            
+            <div class="form-group">
+                <label>Tipo de Oficio</label>
+                <input type="text" id="tipoOficio" placeholder="Ej: Informe de Extracción, Análisis Forense, etc">
             </div>
             
             <div class="form-group">
@@ -361,6 +383,7 @@
             try{
                 const d={
                     numero_legajo:document.getElementById('legajo').value||'SIN NÚMERO',
+                    tipo_oficio:document.getElementById('tipoOficio').value||'',
                     causa:document.getElementById('causa').value||'',
                     fiscalia:document.getElementById('fiscalia').value||'',
                     tecnico_principal:document.getElementById('tecnico').value||'',
@@ -394,6 +417,7 @@
             editing=id;
             document.getElementById('modalTitle').textContent='Editar Oficio';
             document.getElementById('legajo').value=x.numero_legajo||'';
+            document.getElementById('tipoOficio').value=x.tipo_oficio||'';
             document.getElementById('causa').value=x.causa||'';
             document.getElementById('fiscalia').value=x.fiscalia||'';
             document.getElementById('tecnico').value=x.tecnico_principal||'';
@@ -460,6 +484,7 @@
             editing=null;
             document.getElementById('modalTitle').textContent='Nuevo Oficio';
             document.getElementById('legajo').value='';
+            document.getElementById('tipoOficio').value='';
             document.getElementById('causa').value='';
             document.getElementById('fiscalia').value='';
             document.getElementById('tecnico').value='';
