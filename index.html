@@ -139,22 +139,17 @@
             <div id="contactosSection" style="display:none">
                 <div class="card">
                     <h2>Contactos</h2>
-                    <table>
+                    <div style="margin-bottom:20px">
+                        <button class="btn" onclick="editarContactos()" style="margin-bottom:15px">Editar Contactos</button>
+                    </div>
+                    <table id="contactosTable">
                         <thead>
                             <tr>
                                 <th>Departamento</th>
                                 <th>Email</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr>
-                                <td>Delitos Telemáticos</td>
-                                <td><a href="mailto:telematicos@brigada.gov.ar" style="color:#0ea5e9;text-decoration:none">telematicos@brigada.gov.ar</a></td>
-                            </tr>
-                            <tr>
-                                <td>Laboratorio Forense</td>
-                                <td><a href="mailto:labfotodicdc@gmail.com" style="color:#0ea5e9;text-decoration:none">labfotodicdc@gmail.com</a></td>
-                            </tr>
+                        <tbody id="contactosList">
                         </tbody>
                     </table>
                 </div>
@@ -162,7 +157,27 @@
         </div>
     </div>
 
-    <div class="modal" id="newModal">
+    <div class="modal" id="contactosModal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal('contactosModal')">×</span>
+            <h2>Editar Contactos</h2>
+            
+            <div class="form-group">
+                <label>Delitos Telemáticos</label>
+                <input type="email" id="emailTelematicos" placeholder="email@example.com">
+            </div>
+            
+            <div class="form-group">
+                <label>Laboratorio Forense</label>
+                <input type="email" id="emailLaboratorio" placeholder="email@example.com">
+            </div>
+            
+            <div style="display:flex;gap:10px">
+                <button class="btn" onclick="closeModal('contactosModal')" style="flex:1;background:#999">Cancelar</button>
+                <button class="btn" onclick="guardarContactos()" style="flex:1">Guardar</button>
+            </div>
+        </div>
+    </div>
         <div class="modal-content">
             <span class="modal-close" onclick="closeModal('newModal')">×</span>
             <h2 id="modalTitle">Crear Oficio</h2>
@@ -257,7 +272,39 @@
             renderFiles();
         });
 
-        let fileInput=document.createElement('input');
+        let contactos={
+            telematicos:'telematicos@brigada.gov.ar',
+            laboratorio:'labfotodicdc@gmail.com'
+        };
+
+        function renderContactos(){
+            const html=`
+                <tr>
+                    <td>Delitos Telemáticos</td>
+                    <td><a href="mailto:${contactos.telematicos}" style="color:#0ea5e9;text-decoration:none">${contactos.telematicos}</a></td>
+                </tr>
+                <tr>
+                    <td>Laboratorio Forense</td>
+                    <td><a href="mailto:${contactos.laboratorio}" style="color:#0ea5e9;text-decoration:none">${contactos.laboratorio}</a></td>
+                </tr>
+            `;
+            document.getElementById('contactosList').innerHTML=html;
+        }
+
+        function editarContactos(){
+            document.getElementById('emailTelematicos').value=contactos.telematicos;
+            document.getElementById('emailLaboratorio').value=contactos.laboratorio;
+            openModal('contactosModal');
+        }
+
+        function guardarContactos(){
+            contactos.telematicos=document.getElementById('emailTelematicos').value||contactos.telematicos;
+            contactos.laboratorio=document.getElementById('emailLaboratorio').value||contactos.laboratorio;
+            localStorage.setItem('contactos',JSON.stringify(contactos));
+            renderContactos();
+            closeModal('contactosModal');
+            alert('Contactos guardados correctamente');
+        }
         fileInput.type='file';
         fileInput.id='fileInput';
         fileInput.accept='.pdf,.doc,.docx';
@@ -509,6 +556,14 @@
         }
 
         window.addEventListener('load',()=>{
+            // Cargar contactos guardados
+            const contactosGuardados=localStorage.getItem('contactos');
+            if(contactosGuardados){
+                contactos=JSON.parse(contactosGuardados);
+            }
+            renderContactos();
+            
+            // Cargar usuario
             const su=localStorage.getItem('su');
             if(su){
                 user=JSON.parse(su);
