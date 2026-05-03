@@ -393,7 +393,18 @@ async function save(){
         
         // Subir archivos a Storage
         if(files.length>0){
-            const legajo=document.getElementById('legajo').value;
+            let legajo=document.getElementById('legajo').value;
+            // Sanitizar legajo también
+            legajo=legajo
+                .replace(/[ºª]/g,'')
+                .replace(/ñ/g,'n')
+                .replace(/[áàäâ]/g,'a')
+                .replace(/[éèëê]/g,'e')
+                .replace(/[íìïî]/g,'i')
+                .replace(/[óòöô]/g,'o')
+                .replace(/[úùüû]/g,'u')
+                .replace(/[^a-zA-Z0-9._-]/g,'_');
+            
             const folder=`${legajo}/${Date.now()}`;
             
             for(const file of files){
