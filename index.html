@@ -145,11 +145,11 @@
                 <div id="list"></div>
             </div>
             <div id="section-contacts" class="section">
-                <h3 style="margin-bottom:15px">Contactos</h3>
+                <h3 style="margin-bottom:15px">Contactos <button class="btn btn-sm" onclick="openContactosModal()" style="float:right;padding:3px 8px;font-size:10px">Editar</button></h3>
                 <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:15px">
                     <div class="contact-box">
                         <div class="contact-title">Delitos Telematicos</div>
-                        <div class="contact-email">divdtelematicos@outlook.com</div>
+                        <div class="contact-email" data-contact="telematicos">telematicos@brigada.gov.ar</div>
                         <div class="btn-group">
                             <button class="btn btn-sm" onclick="window.open('https://outlook.live.com')"><i class="fas fa-envelope"></i></button>
                             <button class="btn btn-sm" onclick="window.open('https://drive.google.com')"><i class="fas fa-cloud"></i></button>
@@ -157,7 +157,7 @@
                     </div>
                     <div class="contact-box">
                         <div class="contact-title">Laboratorio Fotografico</div>
-                        <div class="contact-email">laboratorio@outlook.com</div>
+                        <div class="contact-email" data-contact="laboratorio">labfotodicdc@gmail.com</div>
                         <div class="btn-group">
                             <button class="btn btn-sm" onclick="window.open('https://outlook.live.com')"><i class="fas fa-envelope"></i></button>
                             <button class="btn btn-sm" onclick="window.open('https://drive.google.com')"><i class="fas fa-cloud"></i></button>
@@ -631,6 +631,30 @@ function showSection(s){
     event.target.closest('.menu-item').classList.add('active');
 }
 
+function openContactosModal(){
+    document.getElementById('emailTelematicos').value=localStorage.getItem('contactoTelematicos')||'telematicos@brigada.gov.ar';
+    document.getElementById('emailLaboratorio').value=localStorage.getItem('contactoLaboratorio')||'labfotodicdc@gmail.com';
+    document.getElementById('contactosModal').style.display='flex';
+}
+
+function closeContactosModal(){
+    document.getElementById('contactosModal').style.display='none';
+}
+
+function guardarContactos(){
+    const telematicos=document.getElementById('emailTelematicos').value;
+    const laboratorio=document.getElementById('emailLaboratorio').value;
+    localStorage.setItem('contactoTelematicos',telematicos);
+    localStorage.setItem('contactoLaboratorio',laboratorio);
+    
+    // Actualizar en la página
+    document.querySelectorAll('[data-contact="telematicos"]').forEach(el=>el.textContent=telematicos);
+    document.querySelectorAll('[data-contact="laboratorio"]').forEach(el=>el.textContent=laboratorio);
+    
+    closeContactosModal();
+    alert('Contactos guardados correctamente');
+}
+
 document.querySelectorAll('.modal').forEach(m=>{
     m.addEventListener('click',e=>{
         if(e.target===m)closeModal(m.id);
@@ -646,5 +670,22 @@ if(su){
     setTimeout(load,300);
 }
 </script>
+    <div class="modal" id="contactosModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:1000;justify-content:center;align-items:center">
+        <div style="background:#fff;padding:30px;border-radius:10px;width:90%;max-width:500px">
+            <h2>Editar Contactos</h2>
+            <div style="margin:20px 0">
+                <label style="font-weight:bold">Delitos Telematicos</label>
+                <input type="email" id="emailTelematicos" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:5px;margin-top:5px" placeholder="email@example.com">
+            </div>
+            <div style="margin:20px 0">
+                <label style="font-weight:bold">Laboratorio Fotografico</label>
+                <input type="email" id="emailLaboratorio" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:5px;margin-top:5px" placeholder="email@example.com">
+            </div>
+            <div style="display:flex;gap:10px;margin-top:20px">
+                <button class="btn" onclick="closeContactosModal()" style="flex:1;background:#999">Cancelar</button>
+                <button class="btn" onclick="guardarContactos()" style="flex:1">Guardar</button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
