@@ -182,7 +182,6 @@
                     <div><label>Legajo</label><input type="text" id="legajo"></div>
                     <div><label>Tipo de Oficio</label><input type="text" id="tipoOficio" placeholder="Ej: Informe de Extracción"></div>
                     <div><label>Causa</label><input type="text" id="causa"></div>
-                    <div><label>Tipo de Oficio</label><input type="text" id="tipoOficio" placeholder="Ej: Informe, Análisis, etc"></div>
                     <div><label>Fiscalia</label><input type="text" id="fiscalia"></div>
                     <div><label>Fecha</label><input type="date" id="fecha"></div>
                 </div>
@@ -221,7 +220,7 @@
 <script>
 const SUPA_URL='https://gmbhptqijgrlxosfskva.supabase.co';
 const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdtYmhwdHFpamdybHhvc2Zza3ZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwNjIyNTAsImV4cCI6MjA5MjYzODI1MH0.FQRwIjvLeXUaNM_Vx2R2KLuYJyWgNrjmuP85QTdRBLY';
-const CLAVE='3813';
+const CLAVE="3813";
 
 let supa=null;
 let user=null;
@@ -448,7 +447,6 @@ async function edit(id){
     document.getElementById('legajo').value=x.numero_legajo||'';
     document.getElementById('tipoOficio').value=x.tipo_oficio||'';
     document.getElementById('causa').value=x.causa||'';
-    document.getElementById('tipoOficio').value=x.tipo_oficio||'';
     document.getElementById('fiscalia').value=x.fiscalia||'';
     document.getElementById('fecha').value=x.fecha_recepcion||'';
     document.getElementById('victima').value=x.victima||'';
