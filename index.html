@@ -347,14 +347,18 @@ function render(){
     }
     
     data.forEach(x=>{
-        const estado=x.estado||'Pendiente';
-        const col=estado==='Pendiente'?'badge-p':estado==='En Tramite'?'badge-t':'badge-f';
-        const causa=x.causa||'Sin especificar';
-        const fiscalia=x.fiscalia||'Sin especificar';
-        const tecnico=x.tecnico_principal||'-';
-        
-        t.innerHTML+=`<tr><td>${x.numero_legajo}</td><td>${tecnico}</td><td><span class="badge ${col}">${estado}</span></td><td><button class="btn" style="padding:3px 6px;font-size:10px" onclick="edit('${x.id}')">E</button></td></tr>`;
-        l.innerHTML+=`<div style="background:#fff;padding:12px;border-radius:5px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,0.1);border-left:4px solid #0ea5e9"><div style="font-weight:bold">${x.numero_legajo}</div><div style="font-size:11px;color:#666;margin:5px 0">${causa}</div><div style="font-size:11px;margin-bottom:8px"><b>F:</b> ${fiscalia} | <b>T:</b> ${tecnico}</div><div style="margin-bottom:8px"><span class="badge" style="background:#0ea5e9;color:#fff">${estado}</span></div><button class="btn" style="padding:5px 8px;font-size:10px" onclick="edit('${x.id}')">Editar</button> <button class="btn" style="padding:5px 8px;font-size:10px;background:#10b981" onclick="cambiarEstado('${x.id}')">Estado</button></div>`;
+        try{
+            const estado=x.estado||'Pendiente';
+            const col=estado==='Pendiente'?'badge-p':estado==='En Tramite'?'badge-t':'badge-f';
+            const causa=x.causa||'Sin especificar';
+            const fiscalia=x.fiscalia||'Sin especificar';
+            const tecnico=x.tecnico_principal||'-';
+            
+            t.innerHTML+=`<tr><td>${x.numero_legajo||'SIN NÚMERO'}</td><td>${tecnico}</td><td><span class="badge ${col}">${estado}</span></td><td><button class="btn" style="padding:3px 6px;font-size:10px" onclick="edit('${x.id}')">E</button></td></tr>`;
+            l.innerHTML+=`<div style="background:#fff;padding:12px;border-radius:5px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,0.1);border-left:4px solid #0ea5e9"><div style="font-weight:bold">${x.numero_legajo||'SIN NÚMERO'}</div><div style="font-size:11px;color:#666;margin:5px 0">${causa}</div><div style="font-size:11px;margin-bottom:8px"><b>F:</b> ${fiscalia} | <b>T:</b> ${tecnico}</div><div style="margin-bottom:8px"><span class="badge" style="background:#0ea5e9;color:#fff">${estado}</span></div><button class="btn" style="padding:5px 8px;font-size:10px" onclick="edit('${x.id}')">Editar</button> <button class="btn" style="padding:5px 8px;font-size:10px;background:#10b981" onclick="cambiarEstado('${x.id}')">Estado</button></div>`;
+        }catch(err){
+            console.error('Error renderizando oficio:', x, err);
+        }
     });
 }
 
